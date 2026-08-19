@@ -7,11 +7,11 @@
 - VRAM:NVIDIA GeForce RTX 4070 Ti 4293918720, AMD Radeon(TM) Graphics    536870912
 - NVIDIA driver:591.86
 - CUDA reported by nvidia-smi:13.1
-- Python: not installed
-- PyTorch: not installed
-- torch.cuda.is_available:not installed
-- Compiler:not installed
-- CMake:not installed
+- Python: 3.10.12
+- PyTorch: 2.13.0+cu130
+- torch.cuda.is_available:true
+- Compiler:11.4.0
+- CMake:not 3.22.1
 - Git version: 2.34.1
 - Notes / Not installed:
 - WSL uname -a:Linux Jay 6.18.33.2-microsoft-standard-WSL2 #1 SMP PREEMPT_DYNAMIC Thu Jun 18 21:54:43 UTC 2026 x86_64 x86_64 x86_64 GNU/Linux
