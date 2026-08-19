@@ -37,6 +37,6 @@ UBUNTU_CODENAME=jammy
 - Clang:Apple clang version 14.0.0 (clang-1400.0.29.202)
 - CMake:not installed
 - Python:3.10.9
-- PyTorch:not installed
-- MPS built/available:unknown
+- PyTorch:2.13.0
+- MPS built/available:true
 - Notes / Not installed:
