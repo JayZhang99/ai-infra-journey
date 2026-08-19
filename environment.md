@@ -14,14 +14,14 @@
 - CMake:
 - Notes / Not installed:
 ## MacBook Pro
-- Date:
-- Architecture:
-- Chip:
-- Memory:
-- macOS:
-- Clang:
-- CMake:
-- Python:
-- PyTorch:
-- MPS built/available:
+- Date:2026年 8月19日 星期三 21时25分19秒 CST
+- Architecture:arm64
+- Chip:Apple M1 Pro
+- Memory:17179869184
+- macOS:26.3
+- Clang:Apple clang version 14.0.0 (clang-1400.0.29.202)
+- CMake:not installed
+- Python:3.10.9
+- PyTorch:not installed
+- MPS built/available:unknown
 - Notes / Not installed:
