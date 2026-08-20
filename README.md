@@ -29,12 +29,12 @@ AI Infra 基础与性能指标
 │   ├── concept/        # 概念资料
 │   └── daily/          # 日报、闭卷复测与错题
 ├── python/
-│   ├── tensor_playground.py
-│   └── tests/
+│   ├── tensor_playground.py  # Tensor、布局、广播与设备往返
+│   ├── mlp_demo.py           # 两层 MLP、训练与 state_dict
+│   └── tests/                # CPU/CUDA 自动测试
 ├── cpp/
-│   ├── CMakeLists.txt
-│   ├── src/
-│   └── tests/
+│   ├── CMakeLists.txt        # C++20 target 与 CTest
+│   └── src/main.cpp
 ├── benchmarks/         # 原始性能数据
 ├── reports/            # 可复现报告
 └── environment.md      # 双机环境基线
@@ -42,20 +42,20 @@ AI Infra 基础与性能指标
 
 ## Current progress
 
-状态更新时间：2026-08-20。
+状态更新时间：2026-08-21。
 
 | 模块 | 当前证据 | 状态 |
 |---|---|---|
 | 仓库与 Git 基线 | README、`.gitignore`、目录结构和日报已建立 | 已完成 |
-| AI Infra 四类方向 | 已完成第一轮学习和闭卷；8.19 约 `4/10` | 已学习，待复测 |
-| 推理链路与性能指标 | 已学习 Latency、QPS、Queue Time、p99、TTFT、TPOT、ITL 等；8.19 部分得分 `6/10` | 已学习，待复测 |
-| 双机环境 | Windows/WSL、4070 Ti、Mac 与 PyTorch 信息已有初版记录 | 部分完成，待订正 |
-| Tensor Playground | shape、stride、dtype、device、broadcasting、reduction、matmul、非连续布局和设备往返已有实现 | Mac/CPU 通过 |
-| Tensor 自动测试 | 2026-08-20 在 Mac 实测 `9 passed, 1 skipped` | CPU 通过，CUDA 待复测 |
-| C++20/CMake/CTest | 文件已预留，当前仍为空 | 未完成 |
-| 两层 MLP 训练闭环 | 已列入 8.20 任务，仓库尚无实现和测试 | 未完成 |
+| AI Infra 基础理论 | 8.20 定点复测 `3/5`；Linear/Module 闭卷 `6.5/10` | 已学习，错题待复测 |
+| 推理链路与性能指标 | 已覆盖 Latency、QPS、Throughput、Concurrency、Queue Time、p99、TTFT、TPOT、ITL | 已学习，Concurrency/有界队列待巩固 |
+| 双机环境 | Mac M1 Pro + WSL/RTX 4070 Ti；Mac 全量 pytest `15 passed, 2 skipped`，WSL `17 passed` | CPU/CUDA 双端基线通过 |
+| Tensor Playground | shape、stride、dtype、device、broadcasting、reduction、matmul、非连续布局和设备往返已有实现 | Mac CPU 与 WSL CUDA 通过 |
+| Tensor 自动测试 | Mac `9 passed, 1 skipped`；WSL CUDA 测试包含在全量 `17 passed` 中 | 已完成当前验收 |
+| C++20/CMake/CTest | C++20 target 已建立，实际编译含 `-std=c++20`；Mac CTest `1/1 Passed` | Mac 基线通过，WSL 日志待留存 |
+| 两层 MLP 训练闭环 | 354 个参数；Loss `13.4590 -> 0.0194`；state_dict 误差 `0.0`；WSL CUDA smoke 通过 | CPU/CUDA 通过 |
 
-详细验收与订正见 [8.19 日报](notes/daily/8.19日报.md)。
+详细验收与订正见 [8.19 日报](notes/daily/8.19日报.md) 和 [8.20 日报](notes/daily/8.20日报.md)。
 
 ## Completed Tensor practice
 
@@ -70,42 +70,95 @@ AI Infra 基础与性能指标
 - NumPy/Tensor 共享内存；
 - CUDA 可用时的 CPU -> CUDA -> CPU 冒烟验证。
 
+当前验收：
+
+- Mac：`9 passed, 1 skipped`，CUDA roundtrip 按预期跳过；
+- WSL/RTX 4070 Ti：CUDA roundtrip 通过，并包含在全量 `17 passed` 中。
+
+## Completed MLP practice
+
+`python/mlp_demo.py` 当前覆盖：
+
+- `Linear(8, 32) -> ReLU -> Linear(32, 2)` 两层 MLP；
+- `[512, 8] -> [512, 2]` 的合成回归数据；
+- MSE Loss、Adam、`zero_grad()`、`backward()`、`step()` 训练闭环；
+- 模型参数注册与参数量检查，总参数量为 `354`；
+- `train()`、`eval()` 和 `inference_mode()` 的最小验证；
+- 保存与加载 `state_dict`，固定输入输出最大绝对误差为 `0.0`；
+- 模型、输入和 target 同时迁移到 `cuda:0` 的 CUDA smoke。
+
+当前参考结果：
+
+```text
+Mac / CPU loss: 13.459022521972656 -> 0.019438406452536583
+Mac / MLP pytest: 6 passed, 1 skipped
+WSL / full pytest: 17 passed in 3.65s
+```
+
+## Completed C++20 baseline
+
+`cpp/` 当前覆盖：
+
+- CMake C++20 target，强制标准且关闭编译器扩展；
+- `std::vector`、`std::accumulate` 和返回码自检；
+- 至少一个由 CTest 驱动的可执行程序测试。
+
+Mac 实测环境与结果：
+
+```text
+CMake 4.4.2
+AppleClang 14.0.0
+compile flag: -std=c++20
+CTest: 1/1 Passed
+program: C++20 baseline OK
+```
+
 ## Quick start
 
-前置条件：Python、PyTorch 和 pytest 已安装。
+前置条件：Python、PyTorch、pytest、CMake 和 C++ 编译器已安装。
+
+Python：
 
 ```bash
 python python/tensor_playground.py
+python python/mlp_demo.py
 python -m pytest -q
 ```
 
-当前 Mac 参考结果：
+C++：
 
-```text
-9 passed, 1 skipped
+```bash
+cmake -S cpp -B cpp/build -DCMAKE_BUILD_TYPE=Debug
+cmake --build cpp/build
+ctest --test-dir cpp/build --output-on-failure
 ```
 
-CUDA 测试在不支持 CUDA 的机器上应当 Skip。只有在 RTX 4070 Ti 主机上实际运行成功后，才记录为 CUDA Pass。
+双机全量 pytest 参考结果：
+
+```text
+Mac: 15 passed, 2 skipped
+WSL: 17 passed in 3.65s
+```
+
+Mac 上两个 CUDA 测试应当 Skip；WSL/RTX 4070 Ti 上两个 CUDA 测试均已实际通过。
 
 ## Known gaps
 
-1. `reduction_and_matmul_demo()` 返回键名为 `mean_last_dim`，当前实现却使用 `mean(dim=1)`，命名与计算维度需要对齐。
-2. Reduction/MatMul 测试尚未直接调用 `reduction_and_matmul_demo()`，需要补充函数级测试。
-3. `view_eroor` 需要改名为 `view_error`；`tensor_nbytes()` 的 Docstring 需要明确描述逻辑字节数而非底层 Storage。
-4. RTX 4070 Ti 的 VRAM、Windows/WSL CMake 和 Mac MPS 字段需要重新采集并订正。
-5. RTX 4070 Ti 上的完整 pytest 与 CPU -> CUDA -> CPU 冒烟测试尚未留下本轮复测证据。
-6. `cpp/CMakeLists.txt` 与 `cpp/src/main.cpp` 仍为空，C++20/CMake/CTest 尚未通过验收。
+1. `non_contiguous_demo()` 内部变量 `view_eroor` 仍需改名为 `view_error`；`tensor_nbytes()` Docstring 应明确它计算的是稠密 Tensor 的逻辑字节数，不是任意 Tensor 的实际底层 Storage 大小。
+2. `environment.md` 中 WSL CMake 字段存在文字错误；需要用实际命令重新采集 CMake 版本，并保存 WSL CMake/CTest 原始输出。
+3. RTX 4070 Ti 的精确 VRAM 应使用 `nvidia-smi --query-gpu=name,memory.total,memory.used,memory.free --format=csv` 留证，不能只记录产品标称值。
+4. 理论测试当前为 `9.5/15（63.3%）`，Parameter 注册、`state_dict`、`eval()`/Autograd、Concurrency 和有界队列需要闭卷复测。
+5. 当前训练仍是全量 CPU/GPU 功能验证，尚未建立包含 Warmup、CUDA 同步、重复次数和分位数的正式 Benchmark。
 
 ## Next milestone
 
-G0 基础工程的下一步：
+G0 基础工程的 Tensor、C++20 和 MLP CPU/CUDA 功能闭环已经通过。下一里程碑进入 Autograd 与训练性能基础：
 
-- 修复 Tensor 已知问题并补直接测试；
-- 完成 C++20 Hello World、CMake target 和至少 1 个 CTest；
-- 实现两层 MLP、合成数据与最小训练循环；
-- 验证 Loss 下降，完成至少 6 个 MLP 测试；
-- 保存并加载 `state_dict`，固定输入最大绝对误差小于 `1e-6`；
-- 在 RTX 4070 Ti 上补齐 CUDA 复测证据。
+- 闭卷复测 Parameter、`state_dict`、`eval()`、`no_grad()`、`inference_mode()`、Concurrency 和有界队列，目标正确率 `>= 80%`；
+- 实现 Autograd Graph、Leaf/Non-leaf Tensor、`grad_fn`、梯度累积、`detach()` 的最小实验与自动测试；
+- 记录一次前向、反向传播和优化器更新中的 shape、device、梯度与参数变化；
+- 修正 `environment.md`，补齐 RTX 4070 Ti VRAM、PyTorch/CUDA 和 WSL CMake/CTest 原始证据；
+- 建立第一个可复现 CPU/CUDA Benchmark，明确 shape、dtype、Batch Size、Warmup、同步方式和重复次数。
 
 ## Safety
 
