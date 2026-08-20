@@ -4,7 +4,7 @@
 - Windows version:10.0.26200 暂缺 Build 26200
 - WSL distro/version:Ubuntu-22.04
 - GPU:NVIDIA GeForce RTX 4070 Ti
-- VRAM:NVIDIA GeForce RTX 4070 Ti 4293918720, AMD Radeon(TM) Graphics    536870912
+- VRAM:12GiB
 - NVIDIA driver:591.86
 - CUDA reported by nvidia-smi:13.1
 - Python: 3.10.12
@@ -35,7 +35,7 @@ UBUNTU_CODENAME=jammy
 - Memory:17179869184
 - macOS:26.3
 - Clang:Apple clang version 14.0.0 (clang-1400.0.29.202)
-- CMake:not installed
+- CMake:4.4.2
 - Python:3.10.9
 - PyTorch:2.13.0
 - MPS built/available:true
