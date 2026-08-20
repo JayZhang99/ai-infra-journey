@@ -76,12 +76,21 @@ def test_inference_output_has_no_grad():
 def test_cuda_smoke():
     device = torch.device("cuda:0")
     torch.manual_seed(7)
+
     x, target = make_data()
-    model = TinyMLP()
-    cuda_x = x.to(device)
-    cuda_target = target.to(device)
-    cuda_model = model.to(device)
-    losses = train_model(model, x, target)
-    cuda_losses = train_model(cuda_model, cuda_x, cuda_target)
-    cpu_cuda_losses = cuda_losses.cpu()
-    assert cuda_losses[-1] < losses[-1]
+    x = x.to(device)
+    target = target.to(device)
+    model = TinyMLP().to(device)
+
+    losses = train_model(
+        model,
+        x,
+        target,
+        steps=50,
+    )
+
+    assert next(model.parameters()).device == device
+    assert x.device == device
+    assert target.device == device
+    assert len(losses) == 50
+    assert losses[-1] < losses[0]
