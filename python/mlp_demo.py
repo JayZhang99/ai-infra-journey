@@ -48,12 +48,31 @@ def save_and_reload(model, path: Path):
     loaded.eval()
     return loaded
 
+def cuda_smoke():
+    if not torch.cuda.is_available():
+        return
+    device = torch.device("cuda:0")
+    torch.manual_seed(7)
+
+    x, target = make_data()
+    x = x.to(device)
+    target = target.to(device)
+    model = TinyMLP().to(device)
+
+    losses = train_model(
+        model,
+        x,
+        target
+    )
+    print(losses[0], losses[-1])
+
 def main():
     torch.manual_seed(7)
     x, target = make_data()
     model = TinyMLP()
     losses = train_model(model, x, target)
     print(losses[0], losses[-1])
+    cuda_smoke()
 
 
 if __name__ == "__main__":
