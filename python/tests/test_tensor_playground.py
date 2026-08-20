@@ -8,6 +8,7 @@ from python.tensor_playground import (
     describe_tensor,
     non_contiguous_demo,
     tensor_nbytes,
+    reduction_and_matmul_demo,
 )
 
 def test_tensor_nbytes_fp16():
@@ -69,17 +70,12 @@ def test_non_contiguous_view_raises():
 
 
 def test_reduction_and_matmul_shape():
-    x = torch.arange(24, dtype=torch.float32).reshape(2, 3, 4)
+    result = reduction_and_matmul_demo()
 
-    assert tuple(x.sum(dim=1).shape) == (2,4)
-    assert tuple(x.mean(dim=-1).shape) == (2,3)
-
-    left = torch.ones(2, 3)
-    right = torch.full((3, 4), 2.0)
-    output = left @ right
-
-    assert tuple(output.shape) == (2, 4)
-    assert torch.equal(output, torch.full((2, 4), 6.0))
+    assert tuple(result["sum_dim_1"].shape) == (2,4)
+    assert tuple(result["mean_last_dim"].shape) == (2,3)
+    assert tuple(result["matmul_output"].shape) == (2, 4)
+    assert torch.equal(result["matmul_output"], torch.full((2, 4), 6.0))
 
 def test_numpy_and_tensor_share_memory():
     array = np.array([1.0, 2.0, 3.0], dtype=np.float32)

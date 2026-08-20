@@ -145,7 +145,7 @@ def reduction_and_matmul_demo() -> dict[str, torch.Tensor]:
     x = torch.arange(24, dtype=torch.float32).reshape(2, 3, 4)
 
     reduced_sum = x.sum(dim=1)
-    reduced_mean = x.mean(dim=1)
+    reduced_mean = x.mean(dim=-1)
 
     left = torch.ones(2, 3)
     right = torch.full((3, 4), 2.0)
