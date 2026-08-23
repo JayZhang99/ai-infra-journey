@@ -39,8 +39,8 @@ def test_trainning_step_demo():
 
 def test_inference_mode_demo():
     result = inference_mode_demo()
-    result["output_requires_grad"] is False
-    result["output_grad_fn"] == None
+    assert result["output_requires_grad"] is False
+    assert result["output_grad_fn"] == None
 
 @pytest.mark.skipif(
     not torch.cuda.is_available(),
