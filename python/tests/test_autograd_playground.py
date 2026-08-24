@@ -18,6 +18,8 @@ def test_inspect_graph():
     assert result["y_grad_fn"] != None
     assert result["x_grad"] == pytest.approx(36.0)
     assert result["y_grad"] == pytest.approx(12.0)
+    assert result["loss_grad_fn"] is not None
+
 
 def test_gradient_accumulation_demo():
     result = gradient_accumulation_demo()
@@ -31,16 +33,28 @@ def test_detach_demo():
     assert result["detached_requires_grad"] is False
     assert result["detach_shares_storage"] is True
     assert result["clone_shares_storage"] is False
+    assert result["detached_grad_fn"] is None
+    assert result["same_values_after_detach"] is True
+
+
 
 def test_trainning_step_demo():
     result = training_step_demo()
     assert math.isfinite(result["grad_norm"])
     assert result["max_parameter_delta"] > 0
+    assert result["initial_loss"] > result["final_loss"]
+    assert result["same_device"] is True
+    assert result["all_grads_finite"] is True
+    assert result["all_grads_present"] is True
+
 
 def test_inference_mode_demo():
     result = inference_mode_demo()
     assert result["output_requires_grad"] is False
     assert result["output_grad_fn"] == None
+    assert result["model_training"] is False
+    assert result["all_modules_in_eval"] is True
+    assert result["repeated_outputs_equal"] is True
 
 @pytest.mark.skipif(
     not torch.cuda.is_available(),

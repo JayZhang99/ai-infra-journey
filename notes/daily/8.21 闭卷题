@@ -1,0 +1,121 @@
+闭卷题 A：基础对象与 Autograd
+
+1. Parameter 与 requires_grad=True 的普通 Tensor，核心区别是什么？
+
+   Parameter是Model自动添加改变的Tensor，普通Tensor需要手动设置requires_grad=True，
+
+   且Paremeter在模型训练时会被改变，普通Tensor不会
+
+2. persistent Buffer 与 Parameter 都进 state_dict，它们在优化器中的
+
+区别是什么？
+
+​	Parameter 在每次优化器Step会被改变
+
+​	Persistent buffer不会
+
+3. model.eval() 会改变哪些行为？为什么它不关闭梯度？
+
+   会改变Dropout和Norm，因为可能需要定位，或结果仍要参与训练
+
+4. no_grad 与 inference_mode 的共同点和关键区别是什么？
+
+   都将梯度关闭，区别为
+
+5. Forward 为什么需要保存部分中间 Tensor？
+
+   问题定位
+
+6. 动态图‘每轮重建’给 Python 控制流带来什么好处？
+
+   
+
+7. grad_fn 与 .grad 分别表示什么？
+
+   grad_fn 为产生梯度的函数
+
+   .grad即为梯度
+
+8. x=2, y=3x, loss=y^2，手算 x.grad。
+
+   x.grad = dloss / dy * dy /dx = 2y * 3 = 2 * 6  * 3 = 36
+
+9. 同一个 x 通过 x^2 与 3x 两条路径进入 loss，为什么梯度要相加？
+
+   因为梯度可能来源于多个方向，转为标量后相加
+
+10. 非标量输出调用 backward 时，为什么需要 gradient 参数？
+
+    因为要对各个方向的Parameter进行优化
+
+
+
+
+
+闭卷题 B：训练、CUDA 与 Serving
+
+1. 为什么 non-leaf 的 .grad 默认是 None？怎样查看？
+
+   因为非叶子节点非用户手动创建，即默认有grad_fn, 则有梯度
+
+   设置retained_grad()查看
+
+2. 连续两次 backward 不清梯度会怎样？为什么这个设计有用？
+
+   梯度会累积，可能出现要算多阶梯度
+
+3. retain_graph 与 create_graph 分别解决什么问题？
+
+   retain_graph 保存中间状态
+
+   create_graph
+
+4. detach 与 detach().clone() 的存储关系有何区别？
+
+   detach 共享内容
+
+   detach().clone() 进行复制不共享内存
+
+5. 原地操作为什么可能让 backward 报版本错误？
+
+   因为原地操作也可能生成parameter 
+
+6. zero_grad、backward、step 的职责和顺序是什么？
+
+   zero_grad 梯度清零，避免梯度无限累积
+
+   backward 反向计算梯度
+
+   step 优化器根据step 修改paramer
+
+   顺序  先 zero_grad 再 backward 最后 step
+
+7. Module.to('cuda') 是否复制模型？Tensor.to 的调用习惯有何不同？
+
+   复制模型 
+
+8. CUDA Kernel 异步执行会怎样影响计时？
+
+   无法准确计算整个系统执行最后时间
+
+9. Queue Time 上升、Compute Time 不变，可以说明什么，不能说明
+
+什么？
+
+​	可以说明模型计算时间没有劣化，不能说明是
+
+队列、Batch、序列化/反序列化等等哪个具体节点劣化
+
+10. 有界队列至少提供哪四种系统保护？
+
+    内存有限、避免无限膨胀、反压、避免无限输入请求
+
+11. TTFT、TPOT 与 ITL 分别描述什么体验？
+
+    1. 首个Token 生成时间
+    2. 首个Token生成后生成每个Token时间
+    3. Token之间的间隔
+
+12. 保存加载后怎样用固定输入证明恢复正确？
+
+​	保存的model 和 model 输入同样的输出应该有同样的输出

@@ -425,9 +425,109 @@ def inference_mode_demo(
         "device": str(first_output.device),
         "dtype": str(first_output.dtype),
     }
+def multi_path_demo(device: str | torch.device = "cpu"):
+    device = torch.device(device)
+    x = torch.tensor(2.0, device = device,requires_grad = True)
+    square = x ** 2
+    linear = x * 3
+    square.contain_grad()
+    linear.contain_grad()
+    loss = square + linear
+    loss.backward()
+    same_device = x.device == device
+    return {
+        "square_contibution" : square.grad.item(),
+        "linear_contribution" : linear.grad.item(),
+        "x_grad": x.grad.item(),
+        "same_device": same_device,
+    }
 
+def hvp_demo(
+    device: str | torch.device = "cpu",
+    dtype: torch.dtype = torch.float32,
+):
+    _validate_dtype(dtype)
+    device = torch.device(device)
+
+    if device.type == "cuda" and not torch.cuda.is_available():
+        raise RuntimeError("CUDA is unavailable")
+
+    x = torch.tensor(
+        [1.0, 2.0],
+        device=device,
+        dtype=dtype,
+        requires_grad=True,
+    )
+
+    v = torch.tensor(
+        [1.0, -1.0],
+        device=device,
+        dtype=dtype,
+    )
+
+    x1, x2 = x.unbind()
+
+    loss = (
+        x1**2
+        + 3 * x1 * x2
+        + 2 * x2**2
+    )
+
+    # 第一次求导：
+    # grad_x = ∇f(x)
+    #
+    # create_graph=True 很重要，因为后面还要对
+    # grad_x 再求一次导数。
+    grad_x, = torch.autograd.grad(
+        loss,
+        x,
+        create_graph=True,
+    )
+
+    # grad_x · v 是标量。
+    grad_vector_product = (grad_x * v).sum()
+
+    # 对 grad_x · v 关于 x 求导：
+    #
+    # ∇x(grad_x · v) = Hᵀv
+    #
+    # 标量函数的 Hessian 对称，因此 Hᵀv = Hv。
+    hvp, = torch.autograd.grad(
+        grad_vector_product,
+        x,
+    )
+
+    expected_hessian = torch.tensor(
+        [
+            [2.0, 3.0],
+            [3.0, 4.0],
+        ],
+        device=device,
+        dtype=dtype,
+    )
+
+    expected_hvp = expected_hessian @ v
+
+    return {
+        "x": x.detach().cpu().tolist(),
+        "vector": v.detach().cpu().tolist(),
+        "loss": _to_float(loss),
+        "gradient": grad_x.detach().cpu().tolist(),
+        "gradient_requires_grad": grad_x.requires_grad,
+        "hvp": hvp.detach().cpu().tolist(),
+        "expected_hvp": expected_hvp.detach().cpu().tolist(),
+        "matches_expected": bool(
+            torch.allclose(hvp, expected_hvp)
+        ),
+        "hvp_shape": list(hvp.shape),
+        "hvp_is_finite": bool(
+            torch.isfinite(hvp).all().item()
+        ),
+        "device": str(hvp.device),
+        "dtype": str(hvp.dtype),
+    }
 def main() -> None:
-    result = inference_mode_demo()
+    result = hvp_demo()
 
     for key, value in result.items():
         print(f"{key}: {value}")
