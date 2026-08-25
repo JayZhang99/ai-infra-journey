@@ -9,9 +9,15 @@ from collections.abc import Callable, Sequence
 from datetime import datetime
 from pathlib import Path
 from typing import Any
+import argparse
 import torch
 
 BOUNDARY = "matmul_compute_only"
+DTYPE_MAP = {
+    "float32": torch.float32,
+    "float16": torch.float16,
+    "bfloat16": torch.bfloat16,
+}
 
 def validate_config(
     size: int,
@@ -23,7 +29,7 @@ def validate_config(
         "warmup": warmup,
         "repeats": repeats,
     }
-    
+
     for name, value in values.items():
         # bool 是 int 的子类，所以需要单独排除。
         if isinstance(value, bool) or not isinstance(value, int):
@@ -403,40 +409,42 @@ def save_result(
 
     return output_path
 
+def build_parser():
+    parser = argparse.ArgumentParser(
+        description="Run a PyTorch MatMul benchmark."
+    )
+    parser.add_argument("--device", default="cpu")
+    parser.add_argument("--sizes", nargs="+", type=int,
+    required=True
+    )
+    parser.add_argument("--dtype", default="float32")
+    parser.add_argument("--warmup", type=int, default=10)
+    parser.add_argument("--repeats", type=int, default=100)
+    parser.add_argument("--output", type=Path, required=True)
+    return parser
+
 def main() -> None:
-    result = run_matmul_benchmark(
-        size=512,
-        device="cpu",
-        dtype=torch.float32,
-        warmup=10,
-        repeats=100,
-    )
+    args = build_parser().parse_args()
+    dtype = DTYPE_MAP[args.dtype]
+    results = []
+    for size in args.sizes:
+        results.append(
+            run_matmul_benchmark(
+                size = size,
+                device = args.device,
+                dtype= dtype,
+                warmup=args.warmup,
+                repeats=args.repeats,
+            )
+        )
+    
+    payload = {
+        "schema_version": 1,
+        "benchmark": "square_matmul",
+        "results": results,
+    }
+    save_result(payload, args.output)
 
-    output_path = save_result(
-        result,
-        "benchmarks/"
-        "2026-08-25_matmul_cpu.json",
-    )
-
-    print(
-        "median:",
-        result["median_ms"],
-        "ms",
-    )
-
-    print(
-        "p95:",
-        result["p95_ms"],
-        "ms",
-    )
-
-    print(
-        "estimated:",
-        result["estimated_tflops"],
-        "TFLOP/s",
-    )
-
-    print("saved:", output_path)
 
 
 if __name__ == "__main__":

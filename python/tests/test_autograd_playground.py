@@ -8,6 +8,8 @@ from python.autograd_playground import (
     detach_demo,
     training_step_demo,
     inference_mode_demo,
+    multi_path_demo,
+    hvp_demo,
 )
 
 def test_inspect_graph():
@@ -55,6 +57,20 @@ def test_inference_mode_demo():
     assert result["model_training"] is False
     assert result["all_modules_in_eval"] is True
     assert result["repeated_outputs_equal"] is True
+
+def test_multi_path_demo():
+    result = multi_path_demo()
+    assert result["square_contibution"] == pytest.approx(4.0)
+    assert result["linear_contribution"] == pytest.approx(3.0)
+    assert result["x_grad"] == pytest.approx(7.0)
+    assert result["same_device"] is True
+
+def test_hvp_demo():
+    result = hvp_demo()
+    assert result["gradient"] == pytest.approx([8.0, 11.0])
+    assert result["hvp"] == pytest.approx([-1.0, -1.0])
+    assert result["matches_expected"] is True
+    assert result["hvp_is_finite"] is True
 
 @pytest.mark.skipif(
     not torch.cuda.is_available(),

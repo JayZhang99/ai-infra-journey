@@ -425,19 +425,26 @@ def inference_mode_demo(
         "device": str(first_output.device),
         "dtype": str(first_output.dtype),
     }
+
 def multi_path_demo(device: str | torch.device = "cpu"):
     device = torch.device(device)
     x = torch.tensor(2.0, device = device,requires_grad = True)
     square = x ** 2
     linear = x * 3
-    square.contain_grad()
-    linear.contain_grad()
     loss = square + linear
+
+    square_grad, = torch.autograd.grad(
+        square, x, retain_graph = True
+    )
+    linear_grad, = torch.autograd.grad(
+        linear, x, retain_graph = True
+    )
+
     loss.backward()
     same_device = x.device == device
     return {
-        "square_contibution" : square.grad.item(),
-        "linear_contribution" : linear.grad.item(),
+        "square_contibution" : square_grad.item(),
+        "linear_contribution" : linear_grad.item(),
         "x_grad": x.grad.item(),
         "same_device": same_device,
     }
