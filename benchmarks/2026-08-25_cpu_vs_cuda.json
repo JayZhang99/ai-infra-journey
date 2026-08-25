@@ -1,0 +1,44 @@
+{
+  "comparison": "cpu_vs_cuda_square_matmul",
+  "cpu_source": "benchmarks/2026-08-25_matmul_cpu.json",
+  "cuda_source": "benchmarks/2026-08-25_matmul_cuda.json",
+  "results": [
+    {
+      "boundary": "matmul_compute_only",
+      "cpu_median_ms": 0.005167,
+      "cpu_p95_ms": 0.00558605,
+      "cpu_tflops": 0.8117484033288175,
+      "cuda_median_ms": 0.10438399761915207,
+      "cuda_p95_ms": 0.1394255965948105,
+      "cuda_tflops": 0.0401814846687807,
+      "dtype": "float32",
+      "size": 128,
+      "speedup": 0.04949992448892352
+    },
+    {
+      "boundary": "matmul_compute_only",
+      "cpu_median_ms": 0.1333335,
+      "cpu_p95_ms": 0.20222885000000002,
+      "cpu_tflops": 2.0132634034207455,
+      "cuda_median_ms": 0.10305599868297577,
+      "cuda_p95_ms": 0.13552800118923186,
+      "cuda_tflops": 2.604753332465099,
+      "dtype": "float32",
+      "size": 512,
+      "speedup": 1.293796593152863
+    },
+    {
+      "boundary": "matmul_compute_only",
+      "cpu_median_ms": 1.449334,
+      "cpu_p95_ms": 1.8820062499999999,
+      "cpu_tflops": 1.4817037673855717,
+      "cuda_median_ms": 0.1730560064315796,
+      "cuda_p95_ms": 0.20412640199065207,
+      "cuda_tflops": 12.409182970768722,
+      "dtype": "float32",
+      "size": 1024,
+      "speedup": 8.374941903984228
+    }
+  ],
+  "schema_version": 1
+}
