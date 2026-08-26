@@ -95,6 +95,13 @@ def test_cuda_smoke(tmp_path):
         top5_path=top5
     )
 
-    assert trace.stat().st_size > 0
-    assert "aten:mm" in top5.read_text()
+    trace_payload = json.loads(
+    trace.read_text(encoding="utf-8")
+)
+    event_names = {
+    event.get("name")
+    for event in trace_payload["traceEvents"]}
+
+    assert "matmul_compute_only" in event_names
+    assert "aten::mm" in event_names
     
