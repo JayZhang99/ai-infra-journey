@@ -80,6 +80,43 @@ def profile_matmul(
     def matmul() -> torch.Tensor:
         return torch.matmul(left, right)
 
+    trace_path.parent.mkdir(
+    parents=True,
+    exist_ok=True,)
+
+    top5_path.parent.mkdir(
+    parents=True,
+    exist_ok=True,
+    )
+
+    sort_by = (
+        "self_cuda_time_total"
+        if resolved_device.type == "cuda"
+        else "self_cpu_time_total"
+    )
+
+
+    def trace_handler(prof) -> None:
+        top5 = prof.key_averages(
+            group_by_input_shape=True,
+        ).table(
+            sort_by=sort_by,
+            row_limit=5,
+        )
+
+        top5_path.write_text(
+            top5 + "\n",
+            encoding="utf-8",
+        )
+
+        prof.export_chrome_trace(
+            str(trace_path)
+        )
+
+        print(top5)
+        print(f"Top 5 saved to: {top5_path}")
+        print(f"Trace saved to: {trace_path}")
+
     with torch.inference_mode():
         # Warmup 不进入 Profiler。
         for _ in range(warmup):
@@ -93,17 +130,33 @@ def profile_matmul(
         if resolved_device.type == "cuda":
             activities.append(ProfilerActivity.CUDA)
 
+        profiler_wait = 1
+        profiler_warmup = 1
+
+        schedule = torch.profiler.schedule(
+            wait=profiler_wait, warmup=profiler_warmup, active=steps, repeat=1
+        )
+
+        total_profiler_steps = (
+            profiler_wait
+            + profiler_warmup
+            + steps
+            )
+
         with profile(
             activities=activities,
+            schedule=schedule,
+            on_trace_ready=trace_handler,
             record_shapes=True,
             profile_memory=True,
             with_stack=False,
         ) as prof:
-            for _ in range(steps):
+            for _ in range(total_profiler_steps):
                 with record_function(
                     "matmul_compute_only"
                 ):
                     output = matmul()
+                prof.step()
 
         # 正确性检查放在 Profiler 区域之外。
         output_is_finite = bool(
@@ -114,39 +167,6 @@ def profile_matmul(
         raise RuntimeError(
             "MatMul output contains non-finite values"
         )
-
-    if resolved_device.type == "cuda":
-        sort_by = "self_cuda_time_total"
-    else:
-        sort_by = "self_cpu_time_total"
-
-    top5 = prof.key_averages(
-        group_by_input_shape=True
-    ).table(
-        sort_by=sort_by,
-        row_limit=5,
-    )
-
-    trace_path.parent.mkdir(
-        parents=True,
-        exist_ok=True,
-    )
-
-    top5_path.parent.mkdir(
-        parents=True,
-        exist_ok=True,
-    )
-
-    prof.export_chrome_trace(str(trace_path))
-
-    top5_path.write_text(
-        top5 + "\n",
-        encoding="utf-8",
-    )
-
-    print(top5)
-    print(f"\nTrace: {trace_path}")
-    print(f"Top 5: {top5_path}")
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
@@ -196,6 +216,28 @@ def build_parser() -> argparse.ArgumentParser:
 
     return parser
 
+def trace_handler(prof):
+    output_dir = Path("benchmarks/profiler")
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    sort_by = (
+        "self_cuda_time_total"
+        if torch.cuda.is_available()
+        else "self_cpu_time_total"
+    )
+
+    top5 = prof.key_averages(
+        group_by_input_shape=True
+    ).table(sort_by=sort_by, row_limit=5)
+    top5_path = output_dir / "matmul_top5.txt"
+    top5_path.write_text(top5 + "\n", encoding="utf-8")
+
+    trace_path = output_dir / "matmul_trace.json"
+    prof.export_chrome_trace(str(trace_path))
+
+    print(top5)
+    print(f"Top 5 saved to: {top5_path}")
+    print(f"Trace saved to: {trace_path}")
 
 def main() -> None:
     args = build_parser().parse_args()

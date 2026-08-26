@@ -1,0 +1,109 @@
+ {
+    "schemaVersion": 1,
+    "deviceProperties": [],
+    
+      "record_shapes": 1,
+      "profile_memory": 1,
+      "trace_id": "76E08DD7AEFC4D5EBF25D497C36DADE8",
+      "host_name": "JayZhangdeMacBook-Pro.local",
+    "displayTimeUnit": "ms",
+    "baseTimeNanoseconds": 1782967788000000000,
+    "traceEvents": [
+    
+  {
+    "ph": "M",
+    "name": "thread_name",
+    "ts": 4801071460521.000,
+    "pid": 50584,
+    "tid": 22515442,
+    "args": {
+      "name": "thread 22515442 ()"
+    }
+  },
+  {
+    "ph": "M",
+    "name": "thread_sort_index",
+    "ts": 4801071460521.000,
+    "pid": 50584,
+    "tid": 22515442,
+    "args": {
+      "sort_index": 22515442
+    }
+  },
+  {
+    "ph": "M",
+    "name": "thread_name",
+    "ts": 4801071460521.000,
+    "pid": 50584,
+    "tid": 22515442,
+    "args": {
+      "name": "thread 22515442 ()"
+    }
+  },
+  {
+    "ph": "M",
+    "name": "thread_sort_index",
+    "ts": 4801071460521.000,
+    "pid": 50584,
+    "tid": 22515442,
+    "args": {
+      "sort_index": 22515442
+    }
+  },
+  {
+    "ph": "X",
+    "cat": "user_annotation",
+    "name": "ProfilerStep#2",
+    "pid": 50584,
+    "tid": 22515442,
+    "ts": 4801071460563.474,
+    "dur": 9.344
+    ,
+    "args": {
+      "External id": 1,"Record function id": 0, "Ev Idx": 0
+    }
+  },
+  {
+    "ph": "X",
+    "cat": "Trace",
+    "name": "PyTorch Profiler (0)",
+    "pid": "Spans",
+    "tid": "PyTorch Profiler",
+    "ts": 4801071460430.000,
+    "dur": 148.000
+    ,
+    "args": {
+      "Op count": 0
+    }
+  },
+  {
+    "ph": "M",
+    "name": "process_sort_index",
+    "ts": 4801071460430.000,
+    "pid": "Spans",
+    "tid": 0,
+    "args": {
+      "sort_index": 536870912
+    }
+  },
+  {
+    "ph": "i",
+    
+    "s": "g",
+    "name": "Iteration Start: PyTorch Profiler",
+    "pid": "Traces",
+    "tid": "Trace PyTorch Profiler",
+    "ts": 4801071460430.000
+    
+  },
+  {
+    "ph": "i",
+    
+    "s": "g",
+    "name": "Record Window End",
+    "pid": "",
+    "tid": "",
+    "ts": 4801071460620.000
+    
+  }
+  ],"traceName": "benchmarks/profiler/matmul_trace.json" }
