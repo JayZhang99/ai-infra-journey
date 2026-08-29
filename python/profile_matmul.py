@@ -262,6 +262,7 @@ def main() -> None:
         steps=args.steps,
         trace_path=args.trace,
         top5_path=args.top5,
+        capture_mode=args.capture_mode,
     )
 
 
