@@ -46,7 +46,13 @@ def profile_matmul(
     steps: int,
     trace_path: Path,
     top5_path: Path,
+    capture_mode: str,
 ) -> None:
+    if capture_mode not in {"full","light"}:
+        raise ValueError("invalid capture mode")
+    
+    full = capture_mode == "full"
+
     if size <= 0:
         raise ValueError("size must be greater than 0")
 
@@ -147,8 +153,8 @@ def profile_matmul(
             activities=activities,
             schedule=schedule,
             on_trace_ready=trace_handler,
-            record_shapes=True,
-            profile_memory=True,
+            record_shapes=full,
+            profile_memory=full,
             with_stack=False,
         ) as prof:
             for _ in range(total_profiler_steps):
