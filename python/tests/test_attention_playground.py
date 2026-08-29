@@ -291,21 +291,9 @@ def test_append_kv_cache():
 )
 
 def test_not_same_device():
-    q = torch.tensor([[
-        [1,2],
-        [2,3]
-    ]
-    ],device = torch.device("cpu"))
-    k = torch.tensor([[
-        [1,2],
-        [2,3]
-    ]
-    ],device = torch.device("cpu"))
-    v = torch.tensor([[
-        [1,2],
-        [2,3]
-    ]
-    ],device = torch.device("cuda:0"))
+    q = torch.randn(1,2,3, device = "cpu")
+    k = torch.randn(1,2,3, device = "cpu")
+    v = torch.randn(1,2,3, device = "cuda")
 
     with pytest.raises(ValueError):
         scaled_dot_product_attention(q,k,v)
@@ -318,17 +306,8 @@ def test_not_same_device():
 def test_cache_pair_device():
     k_cache = torch.randn(1,2,3)
     k_new = torch.randn(1,2,3)
-    v_cache = torch.tensor([[
-        [1,2],
-        [2,3]
-    ]
-    ],device = torch.device("cpu"))
-
-    v_new = torch.tensor([[
-        [1,2],
-        [2,3]
-    ]
-    ],device = torch.device("cuda:0"))
+    v_cache = torch.randn(1,2,3, device = "cpu")
+    v_new = torch.randn(1,2,3, device = "cuda")
 
     with pytest.raises(ValueError):
         validate_cache_pair(k_cache, v_cache, k_new, v_new)
@@ -339,17 +318,9 @@ def test_cache_pair_device():
 )
 
 def test_new_pair_device_mismatch():
-    k = torch.tensor([[
-        [1,2],
-        [2,3]
-    ]
-    ],device = torch.device("cpu"))
-    v = torch.tensor([[
-        [1,2],
-        [2,3]
-    ]
-    ],device = torch.device("cuda:0"))
-
+    
+    k = torch.randn(1,2,3, device = "cpu")
+    v = torch.randn(1,2,3, device = "cuda")
     with pytest.raises(ValueError):
         validate_new_pair(k, v)
 

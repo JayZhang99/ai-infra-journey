@@ -17,7 +17,8 @@ def test_cpu_profile_smoke(tmp_path):
         dtype=torch.float32,
         warmup=1, steps=2,
         trace_path=trace,
-        top5_path=top5
+        top5_path=top5,
+        capture_mode="full"
     )
 
     trace_payload = json.loads(
