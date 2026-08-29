@@ -18,7 +18,7 @@ def test_cpu_profile_smoke(tmp_path):
         warmup=1, steps=2,
         trace_path=trace,
         top5_path=top5,
-        capture_mode="full"
+        capture_mode="light",
     )
 
     trace_payload = json.loads(
@@ -44,7 +44,8 @@ def test_size_eqaul_zero(tmp_path):
         dtype=torch.float32,
         warmup=1, steps=2,
         trace_path=trace,
-        top5_path=top5
+        top5_path=top5,
+        capture_mode="light",
     )
 
 def test_warmup_less_zero(tmp_path):
@@ -60,7 +61,8 @@ def test_warmup_less_zero(tmp_path):
         dtype=torch.float32,
         warmup=-1, steps=2,
         trace_path=trace,
-        top5_path=top5
+        top5_path=top5,
+        capture_mode="light",
     )
 
 def test_steps_eqaul_zero(tmp_path):
@@ -76,7 +78,8 @@ def test_steps_eqaul_zero(tmp_path):
         dtype=torch.float32,
         warmup=0, steps=0,
         trace_path=trace,
-        top5_path=top5
+        top5_path=top5,
+        capture_mode="light",
     )
 
 @pytest.mark.skipif(
@@ -93,7 +96,8 @@ def test_cuda_smoke(tmp_path):
         dtype=torch.float32,
         warmup=1, steps=2,
         trace_path=trace,
-        top5_path=top5
+        top5_path=top5,
+        capture_mode="light",
     )
 
     trace_payload = json.loads(
