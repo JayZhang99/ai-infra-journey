@@ -210,7 +210,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     parser.add_argument(
         "--capture-mode",
-        type=str,
+        capture_mode=str,
         default="full",
     )
 
