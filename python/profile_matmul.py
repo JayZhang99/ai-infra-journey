@@ -209,6 +209,12 @@ def build_parser() -> argparse.ArgumentParser:
     )
 
     parser.add_argument(
+        "--capture-mode",
+        type=str,
+        default="full",
+    )
+
+    parser.add_argument(
         "--trace",
         type=Path,
         required=True,
