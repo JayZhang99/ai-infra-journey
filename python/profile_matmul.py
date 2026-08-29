@@ -209,8 +209,8 @@ def build_parser() -> argparse.ArgumentParser:
     )
 
     parser.add_argument(
-        "--capture-mode",
-        capture_mode=str,
+        "--capture_mode",
+        type=str,
         default="full",
     )
 
@@ -262,7 +262,7 @@ def main() -> None:
         steps=args.steps,
         trace_path=args.trace,
         top5_path=args.top5,
-        capture_mode=args.capture_mode,
+        capture_mode=args.capture_mode
     )
 
 
