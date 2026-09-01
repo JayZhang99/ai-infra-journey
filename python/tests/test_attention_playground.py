@@ -277,12 +277,25 @@ def test_append_kv_cache():
     v_new = torch.randn(1,2,3)
 
     k_out, v_out = append_kv_cache(k_cache, v_cache, k_new, v_new)
+    expected_k = torch.cat([k_cache, k_new], dim=-2)
+    expected_v = torch.cat([v_cache, v_new], dim=-2)
+
+    torch.testing.assert_close(k_out, expected_k)
+    torch.testing.assert_close(v_out, expected_v)
+    
 
     assert k_out.shape[-2] == k_cache.shape[-2] + k_new.shape[-2]
+    assert v_out.shape[-2] == v_cache.shape[-2] + v_new.shape[-2]
     k_now =  k_out[:, -k_new.shape[-2]:, :] 
-    assert torch.equal(k_now, k_new)
+    v_now = v_out[:, -k_new.shape[-2]:, :]
+
+    torch.testing.assert_close(k_now, k_new)
     k_pre = k_out[:,:-k_new.shape[-2],:]
-    assert torch.equal(k_cache,k_cache)
+    torch.testing.assert_close(k_cache, k_pre)
+    torch.testing.assert_close(v_now, v_new)
+    v_pre = v_out[:,:-v_new.shape[-2],:]
+    torch.testing.assert_close(v_cache, v_pre)
+
 
 
 @pytest.mark.skipif(
