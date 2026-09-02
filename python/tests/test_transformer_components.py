@@ -3,6 +3,7 @@ from __future__ import annotations
 import math
 import pytest
 import torch
+import torch.nn.functional as F
 
 from python.transformer_components import RMSNorm
 from python.transformer_components import SwiGLU
@@ -38,13 +39,13 @@ def test_rmsnorm_rejects_bad_last_dim():
     with pytest.raises(ValueError):
         RMSNorm(8)(torch.randn(2,3,7))
 
-def tset_swiglu_matches_reference():
+def test_swiglu_matches_reference():
     torch.manual_seed(0)
     mod = SwiGLU(d_model=8, d_ff=16, bias=False)
     x = torch.rand(2, 3, 8)
 
-    gate = F.Linear(x, mod.gate_proj.weight)
-    up = F.Linear(x, mod.up_proj.weight)
+    gate = F.linear(x, mod.gate_proj.weight)
+    up = F.linear(x, mod.up_proj.weight)
     expected = F.linear(
         F.silu(gate) * up,
         mod.down_proj.weight
@@ -52,14 +53,14 @@ def tset_swiglu_matches_reference():
     actual = mod(x)
     torch.testing.assert_close(actual, expected)
 
-def tset_swiglu_parameters_and_gradients():
+def test_swiglu_parameters_and_gradients():
     mod = SwiGLU(8, 16)
     x = torch.randn(2, 3, 8, requires_grad=True)
     y = mod(x)
     assert y.shape == (2,3,8)
     assert torch.isfinite(y).all()
 
-    y.square().mean.backward()
+    y.square().mean().backward()
     assert x.grad is not None
     for parameter in mod.parameters():
         assert parameter.grad is not None
@@ -67,7 +68,7 @@ def tset_swiglu_parameters_and_gradients():
     assert mod.gate_proj.weight.shape ==(16, 8)
     assert mod.down_proj.weight.shape ==(8, 16)
 
-def tset_tiny_ffn_block_matches_compositino():
+def test_tiny_ffn_block_matches_compositino():
     torch.manual_seed(0)
     block = TinyFFNBlock(8, 16)
     x = torch.randn(2,3,8)
@@ -174,5 +175,4 @@ def test_mha_device(device):
     y,w = mod(x)
     assert y.device.type == device
     assert w.device.type == device
-
 
