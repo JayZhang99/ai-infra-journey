@@ -1,23 +1,21 @@
 from __future__ import annotations
 
-import json
-import math
 import platform
-import statistics
-import time
-from collections.abc import Callable, Sequence
 from datetime import datetime
 from pathlib import Path
 from typing import Any
 import argparse
 import torch
 
+from .benchmark_utils import (
+    DTYPE_MAP,
+    save_result,
+    summarize,
+    time_cpu,
+    time_cuda,
+)
+
 BOUNDARY = "matmul_compute_only"
-DTYPE_MAP = {
-    "float32": torch.float32,
-    "float16": torch.float16,
-    "bfloat16": torch.bfloat16,
-}
 
 def validate_config(
     size: int,
@@ -52,154 +50,6 @@ def validate_config(
         raise ValueError(
             f"repeats must be greater than 0, got {repeats}"
         )
-
-def _percentile(
-    samples: Sequence[float],
-    quantile: float,
-) -> float:
-    """Calculate a percentile with linear interpolation."""
-
-    if not 0.0 <= quantile <= 1.0:
-        raise ValueError(
-            f"quantile must be in [0, 1], got {quantile}"
-        )
-
-    ordered = sorted(samples)
-
-    if len(ordered) == 1:
-        return ordered[0]
-
-    position = (len(ordered) - 1) * quantile
-
-    lower_index = math.floor(position)
-    upper_index = math.ceil(position)
-
-    if lower_index == upper_index:
-        return ordered[lower_index]
-
-    fraction = position - lower_index
-
-    lower = ordered[lower_index]
-    upper = ordered[upper_index]
-
-    return lower + (upper - lower) * fraction
-
-def summarize(samples_ms: Sequence[float],):
-
-    if not samples_ms:
-        raise ValueError("samples_ms must not be empty")
-
-    samples = [
-        float(sample)
-        for sample in samples_ms
-    ]
-
-    if any(
-        not math.isfinite(sample)
-        for sample in samples
-    ):
-        raise ValueError(
-            "samples_ms must contain finite values"
-        )
-
-    if any(sample < 0 for sample in samples):
-        raise ValueError(
-            "samples_ms must contain non-negative values"
-        )
-
-    return {
-        "count": len(samples),
-        "min_ms": min(samples),
-        "mean_ms": statistics.fmean(samples),
-        "median_ms": statistics.median(samples),
-        "p95_ms": _percentile(samples, 0.95),
-        "max_ms": max(samples),
-    }
-
-def time_cpu(
-    fn: Callable[[], Any],
-    warmup: int = 10,
-    repeats: int = 100,
-) -> list[float]:
-    """Measure a synchronous CPU callable."""
-
-    # 这里只需要校验 warmup 和 repeats。
-    # size=1 是占位值。
-    validate_config(
-        size=1,
-        warmup=warmup,
-        repeats=repeats,
-    )
-
-    # Warmup 不进入统计。
-    for _ in range(warmup):
-        fn()
-
-    samples_ms: list[float] = []
-
-    for _ in range(repeats):
-        start_ns = time.perf_counter_ns()
-
-        fn()
-
-        end_ns = time.perf_counter_ns()
-
-        elapsed_ms = (
-            end_ns - start_ns
-        ) / 1_000_000.0
-
-        samples_ms.append(elapsed_ms)
-
-    return samples_ms
-
-def time_cuda(
-    fn: Callable[[], Any],
-    warmup: int = 10,
-    repeats: int = 100,
-) -> list[float]:
-    """Measure CUDA work with CUDA Events."""
-
-    validate_config(
-        size=1,
-        warmup=warmup,
-        repeats=repeats,
-    )
-
-    if not torch.cuda.is_available():
-        raise RuntimeError("CUDA is unavailable")
-
-    for _ in range(warmup):
-        fn()
-
-    # 等待 Warmup 提交的 Kernel 全部完成。
-    torch.cuda.synchronize()
-
-    start_event = torch.cuda.Event(
-        enable_timing=True
-    )
-    end_event = torch.cuda.Event(
-        enable_timing=True
-    )
-
-    samples_ms: list[float] = []
-
-    for _ in range(repeats):
-        start_event.record()
-
-        fn()
-
-        end_event.record()
-
-        # 等待 end_event 对应的 GPU 工作完成。
-        end_event.synchronize()
-
-        elapsed_ms = start_event.elapsed_time(
-            end_event
-        )
-
-        samples_ms.append(float(elapsed_ms))
-
-    return samples_ms
 
 def run_matmul_benchmark(
     size: int,
@@ -380,34 +230,6 @@ def run_matmul_benchmark(
             output_requires_grad
         ),
     }
-
-def save_result(
-    result: dict[str, Any],
-    path: str | Path,
-) -> Path:
-    """Save benchmark result as UTF-8 JSON."""
-
-    output_path = Path(path)
-
-    output_path.parent.mkdir(
-        parents=True,
-        exist_ok=True,
-    )
-
-    serialized = json.dumps(
-        result,
-        ensure_ascii=False,
-        indent=2,
-        sort_keys=True,
-        allow_nan=False,
-    )
-
-    output_path.write_text(
-        serialized + "\n",
-        encoding="utf-8",
-    )
-
-    return output_path
 
 def build_parser():
     parser = argparse.ArgumentParser(

@@ -1,33 +1,24 @@
 from __future__ import annotations
 
-import json
 import math
 import platform
-import statistics
-import time
-from collections.abc import Callable, Sequence
 from datetime import datetime
 from pathlib import Path
 from typing import Any
 import argparse
 import torch
 
-from benchmark_matmul import(
+from .benchmark_utils import (
+    DTYPE_MAP,
+    save_result,
+    summarize,
     time_cpu,
     time_cuda,
-    summarize,
-    save_result
 )
 
 BOUNDARY = "qk_softmax_v_only"
 BENCHMARK = "attention_core"
 CASE_LIST = ["prefill", "decode_no_cache", "decode_cached"]
-DTYPE_MAP = {
-    "float32" : torch.float32,
-    "float16" : torch.float16,
-    "bfloat16" : torch.bfloat16,
-}
-
 def estimate_kv_cache_bytes(
     layers, batch, kv_heads, sequence, head_dim, dtype
 ):

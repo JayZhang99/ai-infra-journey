@@ -6,10 +6,12 @@ import torch
 
 from python.benchmark_matmul import (
     run_matmul_benchmark,
+    validate_config,
+)
+from python.benchmark_utils import (
     save_result,
     summarize,
     time_cpu,
-    validate_config,
 )
 
 def test_validate_config():
