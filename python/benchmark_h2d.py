@@ -189,18 +189,18 @@ class H2DPipeline:
             self.start.elapsed_time(self.end)
         )
 
-    def time_pipeline(
-        pipeline: H2DPipeline,
-        warmup: int,
-        repeats: int,
-    ) -> list[float]:
-        for _ in range(warmup):
-            pipeline.elapsed_ms()
-        
-        return [
-            pipeline.elapsed_ms()
-            for _ in range(repeats)
-        ]
+def time_pipeline(
+    pipeline: H2DPipeline,
+    warmup: int,
+    repeats: int,
+) -> list[float]:
+    for _ in range(warmup):
+        pipeline.elapsed_ms()
+    
+    return [
+        pipeline.elapsed_ms()
+        for _ in range(repeats)
+    ]
 
 def run_h2d_benchmark(
     rows: int,
@@ -280,7 +280,7 @@ def run_h2d_benchmark(
 
         compute_outputs = [
             torch.empty_like(outputs[0])
-            for _ in range
+            for _ in range(chunks)
         ]
 
         sequential_outputs = [
@@ -352,7 +352,7 @@ def run_h2d_benchmark(
         ):
             torch.testing.assert_close(
                 actual,
-                expected,
+                reference,
             )
         
         copy_samples = time_on_stream(
