@@ -47,6 +47,7 @@ def run_attention_case(
     heads: int,
     sequence : int,
     head_dim : int,
+    kv_heads: int,
     device : str | torch.device = "cpu",
     dtype: torch.dtype = torch.float32,
     layers: int = 1,
@@ -54,6 +55,15 @@ def run_attention_case(
     repeats: int =100,
     seed: int = 11,
 ) -> dict[str, Any]:
+    if heads % kv_heads != 0:
+        raise ValueError(
+            "heads must be divisible by kv_heads"
+        )
+    
+    if kv_heads != heads:
+        raise NotImplementedError(
+            "GQA compute is not implemented"
+        )
     kv_cache_bytes = estimate_kv_cache_bytes(layers,batch,heads,sequence,head_dim,dtype)
     device = torch.device(device)
 
@@ -201,7 +211,9 @@ def main()-> None:
                     heads=args.heads,
                     sequence=sequence,
                     head_dim=args.head_dim,
-                    case = case_mode,       
+                    case = case_mode,
+                    layers=args.layers,
+                    kv_heads=args.kv_heads,       
             ))
     payload = {
         "schema_version":1,
