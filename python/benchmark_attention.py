@@ -19,6 +19,23 @@ from .benchmark_utils import (
 BOUNDARY = "qk_softmax_v_only"
 BENCHMARK = "attention_core"
 CASE_LIST = ["prefill", "decode_no_cache", "decode_cached"]
+def validate_config(
+    layers, batch, kv_heads, sequence, head_dim, dtype, heads
+):
+    sizes = {
+        "batch": batch,
+        "heads": heads,
+        "kv_heads": kv_heads,
+        "sequence": sequence,
+        "head_dim": head_dim,
+        "layers":layers
+    }
+    for name, value in sizes.items():
+        if isinstance(value, bool) or not isinstance(value, int):
+            raise TypeError(f"{name} must be int")
+        if value <= 0:
+            raise ValueError(f"{name} must be positive")
+
 def estimate_kv_cache_bytes(
     layers, batch, kv_heads, sequence, head_dim, dtype
 ):
@@ -55,6 +72,8 @@ def run_attention_case(
     repeats: int =100,
     seed: int = 11,
 ) -> dict[str, Any]:
+    validate_config(layers, batch, kv_heads, sequence, head_dim, dtype, heads)
+
     if heads % kv_heads != 0:
         raise ValueError(
             "heads must be divisible by kv_heads"
@@ -64,7 +83,8 @@ def run_attention_case(
         raise NotImplementedError(
             "GQA compute is not implemented"
         )
-    kv_cache_bytes = estimate_kv_cache_bytes(layers,batch,heads,sequence,head_dim,dtype)
+
+    kv_cache_bytes = estimate_kv_cache_bytes(layers,batch,kv_heads,sequence,head_dim,dtype)
     device = torch.device(device)
 
     if device.type not in {"cpu", "cuda"}:
@@ -158,20 +178,23 @@ def run_attention_case(
         "case": case,
         "batch": batch,
         "heads": heads,
+        "kv_heads": kv_heads,
         "sequence": sequence,
         "head_dim": head_dim,
+        "layers": layers,
+        "timer": timer,
         "dtype":str(dtype).removeprefix("torch."),
         "device": str(device),
         "device_name": device_name,
         "torch_version": str(torch.__version__),
-        "cuda_vesion": torch.version.cuda,
+        "cuda_version": torch.version.cuda,
         "torch_num_threads":(
             torch.get_num_threads()
         ),
         "seed": seed,
         "warmup": warmup,
         "repeats": repeats,
-        "sample_ms": samples_ms,
+        "samples_ms": samples_ms,
         "median_ms": summary["median_ms"],
         "p95_ms": summary["p95_ms"],
         "output_is_finite": output_is_finite,

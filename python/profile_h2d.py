@@ -13,6 +13,32 @@ from torch.profiler import (
 from .benchmark_h2d import H2DPipeline
 from .benchmark_utils import DTYPE_MAP
 
+
+def validate_config(
+    capture_mode, active_steps, rows, inner, out_features, chunks, device, 
+):
+    sizes = {
+        "active_steps": active_steps,
+        "rows": rows,
+        "inner": inner,
+        "out_features": out_features,
+        "chunks":chunks,
+    }
+    for name, value in sizes.items():
+        if isinstance(value, bool) or not isinstance(value, int):
+            raise TypeError(f"{name} must be int")
+        if value <= 0:
+            raise ValueError(f"{name} must be positive")
+    
+    if capture_mode not in {"full","light"}:
+        raise ValueError("invalid capture mode")
+    
+    cuda_device = torch.device(device)
+
+    if cuda_device.type != "cuda":
+        raise ValueError("device must be CUDA")
+
+
 def profile_h2d(
     *,
     rows: int,
@@ -26,17 +52,20 @@ def profile_h2d(
     dtype: torch.dtype = torch.float32,
     device: str = "cuda:0",
 ):
+    validate_config(
+        capture_mode=capture_mode,
+        active_steps=active_steps,
+        rows=rows,
+        inner=inner,
+        out_features=out_features,
+        chunks=chunks,
+        device=device
+        )
+        
     if not torch.cuda.is_available():
         raise RuntimeError("CUDA is unavailable")
 
-    if capture_mode not in {"full","light"}:
-        raise ValueError("invalid capture mode")
-
-    cuda_device = torch.device(device)
-
-    if cuda_device.type != "cuda":
-        raise ValueError("device must be CUDA")
-    
+    cuda_device = torch.device(device) 
     full = capture_mode == "full"
 
     trace_path.parent.mkdir(

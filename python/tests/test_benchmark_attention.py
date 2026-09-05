@@ -67,6 +67,7 @@ def test_attention_benchmark_cpu_smoke():
         case="decode_cached",
         batch=1,
         heads=2,
+        kv_heads=2,
         sequence=8,
         head_dim=4,
         device="cpu",
@@ -77,7 +78,7 @@ def test_attention_benchmark_cpu_smoke():
     assert result["case"] == "decode_cached"
     assert result["repeats"] == 2
     assert result["output_is_finite"] is True
-    assert len(result["sample_ms"]) == 2
+    assert len(result["samples_ms"]) == 2
 
 def test_unknown_case():
     with pytest.raises(ValueError):
@@ -85,6 +86,7 @@ def test_unknown_case():
         case="unknown case",
         batch=1,
         heads=2,
+        kv_heads=2,
         sequence=8,
         head_dim=4,
         device="cpu",
@@ -99,6 +101,7 @@ def test_sequence_zero():
         case="decode_cached",
         batch=1,
         heads=2,
+        kv_heads=2,
         sequence=0,
         head_dim=4,
         device="cpu",
@@ -113,6 +116,7 @@ def test_repeats_zero():
         case="decode_cached",
         batch=1,
         heads=2,
+        kv_heads=2,
         sequence=8,
         head_dim=4,
         device="cpu",
@@ -141,6 +145,7 @@ def test_int_dtype():
         case="decode_cached",
         batch=1,
         heads=2,
+        kv_heads=2,
         sequence=8,
         head_dim=4,
         device="cpu",
@@ -158,6 +163,7 @@ def test_prefill_output_shape():
         case="prefill",
         batch=1,
         heads=2,
+        kv_heads=2,
         sequence=8,
         head_dim=4,
         device="cpu",
@@ -179,6 +185,7 @@ def test_cached_shape():
         case="decode_cached",
         batch=1,
         heads=2,
+        kv_heads=2,
         sequence=8,
         head_dim=4,
         device="cpu",
@@ -195,3 +202,20 @@ def test_cached_shape():
     assert seq_len == 1
     assert hidden_dim == result["head_dim"]
     
+def test_attention_schema():
+    result = run_attention_case(
+        case="decode_cached",
+        batch=1,
+        heads=2,
+        kv_heads=2,
+        sequence=8,
+        head_dim=4,
+        layers=7,
+        warmup=0,
+        repeats=2,
+    )
+
+    assert result["kv_heads"] == 2
+    assert result["layers"] == 7
+    assert result["timer"] ==  "perf_counter_ns"
+    assert len(result["samples_ms"]) == 2
