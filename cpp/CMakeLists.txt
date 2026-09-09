@@ -11,3 +11,18 @@ include(CTest)
 if(BUILD_TESTING)
     add_test(NAME hello_runs COMMAND ai_infra_hello)
 endif()
+
+include(CheckLanguage)
+
+option(BUILD_CUDA_LAB "Build CUDA kernel experiments" ON)
+
+if(BUILD_CUDA_LAB)
+    check_language(CUDA)
+
+    if(CMAKE_CUDA_COMPILER)
+        enable_language(CUDA)
+        add_subdirectory(cuda-kernel-lab)
+    else()
+        message(FATAL_ERROR "CUDA compiler not found")
+    endif()
+endif()
