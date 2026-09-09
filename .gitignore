@@ -1,3 +1,7 @@
+# C++ / CUDA build outputs
+cpp/build/
+cpp/build-*/
+
 .pytest_cache/
 .venv/
 build/
