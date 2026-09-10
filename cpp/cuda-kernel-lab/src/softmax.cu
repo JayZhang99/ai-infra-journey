@@ -5,7 +5,8 @@
 #include <stdexcept>
 #include <string>
 
-void cuda_check(cudaError_t error, const char* operation) {
+namespace{
+    void cuda_check(cudaError_t error, const char* operation) {
     if (error != cudaSuccess) {
         throw std::runtime_error(
             std::string(operation) + ": " +
@@ -13,6 +14,8 @@ void cuda_check(cudaError_t error, const char* operation) {
         );
     }
 }
+}
+
 
 __global__ void softmax_baseline_f32(
     const float* x, float* y,
@@ -76,7 +79,7 @@ __device__ float block_sum(float v) {
     __shared__ float result;
     int lane = threadIdx.x & 31;
     int warp = threadIdx.x >> 5;
-    int nwarps = (blockDim.x + 32) >> 5;
+    int nwarps = (blockDim.x + 31) >> 5;
 
     v = warp_sum(v, __activemask());
     if (lane == 0) warp_values[warp] = v;

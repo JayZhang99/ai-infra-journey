@@ -21,7 +21,8 @@ struct BenchmarkResult {
     float p95_ms;
 };
 
-void cuda_check(
+namespace{
+    void cuda_check(
     cudaError_t error,
     const char* operation
 ) {
@@ -31,6 +32,7 @@ void cuda_check(
             cudaGetErrorString(error)
         );
     }
+}
 }
 
 float percentile(
