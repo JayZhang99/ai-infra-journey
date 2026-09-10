@@ -121,10 +121,9 @@ __global__ void softmax_block_f32(
 
 void launch_softmax_f32(
     const float* device_input,
+    float* device_output,
     int rows,
     int cols,
-    float* device_output,
-    int blocks,
     int threads,
     SoftmaxKind kind,
     cudaStream_t stream
