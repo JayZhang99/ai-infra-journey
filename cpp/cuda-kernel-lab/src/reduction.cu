@@ -152,11 +152,11 @@ const char* reduce_kind_name(ReduceKind kind) {
 
 void launch_reduction(
     const float* device_input,
-    std::size_t n,
     float* device_output,
-    int blocks,
+    int rows,
+    int cols,
     int threads,
-    ReduceKind kind,
+    SoftmaxKind kind,
     cudaStream_t stream
 ) {
     if (device_input == nullptr ||
