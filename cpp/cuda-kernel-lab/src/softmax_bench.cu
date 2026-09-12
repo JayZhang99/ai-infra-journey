@@ -74,7 +74,8 @@ BenchmarkResult run_benchmark(
     int threads,
     SoftmaxKind kind,
     int warmup,
-    int repeats
+    int repeats，
+    int launches_per_sample
 ) {
     const std::size_t count =
         static_cast<std::size_t>(rows) * cols;
@@ -136,15 +137,19 @@ BenchmarkResult run_benchmark(
 
     // Warmup，不记录。
     for (int i = 0; i < warmup; ++i) {
-        launch_softmax_f32(
-            device_input,
-            device_output,
-            rows,
-            cols,
-            threads,
-            kind,
-            stream
-        );
+        for (int i = 0; i < warmup; ++i) {
+            for (int k = 0; k < launches_per_sample; ++k) {
+                launch_softmax_f32(
+                    device_input,
+                    device_output,
+                    rows,
+                    cols,
+                    threads,
+                    kind,
+                    stream
+                );
+            }
+        } 
     }
 
     cuda_check(
@@ -163,16 +168,17 @@ BenchmarkResult run_benchmark(
             "record start"
         );
 
-        launch_softmax_f32(
-            device_input,
-            device_output,
-            rows,
-            cols,
-            threads,
-            kind,
-            stream
-        );
-
+        for(int k = 0;
+            k < launches_per_sample;
+            ++k){
+                launch_softmax_f32(
+                    device_input,
+                    device_output,
+                    rows,
+                    cols,
+                    threads,
+                    kind,
+                    stream);}
         cuda_check(
             cudaEventRecord(stop, stream),
             "record stop"
@@ -193,8 +199,8 @@ BenchmarkResult run_benchmark(
             ),
             "elapsed time"
         );
-
-        samples.push_back(elapsed_ms);
+        const float per_launch_ms = elapsed_ms / launches_per_sample;
+        samples.push_back(per_launch_ms);
     }
 
     // 正确性只在计时外检查一次。
@@ -260,6 +266,7 @@ int main(int argc, char** argv) {
         constexpr int threads = 256;
         constexpr int warmup = 10;
         constexpr int repeats = 100;
+        constexpr int launches_per_sample = 200;
 
         const int row_values[] = {
             1, 32, 256
@@ -286,7 +293,8 @@ int main(int argc, char** argv) {
                             threads,
                             kind,
                             warmup,
-                            repeats
+                            repeats，
+                            launches_per_sample
                         )
                     );
                 }
@@ -295,7 +303,21 @@ int main(int argc, char** argv) {
 
         std::ofstream output(output_path);
 
-        output << "{\n  \"results\": [\n";
+        output
+            << "{\n"
+            << "  \"schema_version\": 2,\n"
+            << "  \"benchmark\": \"softmax_f32\",\n"
+            << "  \"measurement\": "
+            << std::quoted("amortized_per_launch")
+            << ",\n"
+            << "  \"time_unit\": \"ms\",\n"
+            << "  \"warmup_batches\": "
+            << warmup << ",\n"
+            << "  \"repeats\": "
+            << repeats << ",\n"
+            << "  \"launches_per_sample\": "
+            << launches_per_sample << ",\n"
+            << "  \"results\": [\n";
 
         for (std::size_t i = 0;
              i < results.size();
@@ -315,11 +337,11 @@ int main(int argc, char** argv) {
                     softmax_kind_name(result.kind)
                 )
                 << ",\n"
-                << "      \"median_ms\": "
+                << "      \"median_per_launch_ms\": "
                 << result.median_ms << ",\n"
-                << "      \"p95_ms\": "
+                << "      \"p95_batch_average_ms\": "
                 << result.p95_ms << ",\n"
-                << "      \"samples_ms\": [";
+                << "      \"samples_per_launch_ms\": [";
 
             for (std::size_t sample = 0;
                  sample < result.samples_ms.size();

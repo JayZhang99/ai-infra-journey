@@ -187,7 +187,7 @@ switch (kind) {
 
     cuda_check(
         cudaGetLastError(),
-        "launch reduction kernel"
+        "launch softmax kernel"
     );
 }
 
