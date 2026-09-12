@@ -74,7 +74,7 @@ BenchmarkResult run_benchmark(
     int threads,
     SoftmaxKind kind,
     int warmup,
-    int repeats，
+    int repeats,
     int launches_per_sample
 ) {
     const std::size_t count =
@@ -293,7 +293,7 @@ int main(int argc, char** argv) {
                             threads,
                             kind,
                             warmup,
-                            repeats，
+                            repeats,
                             launches_per_sample
                         )
                     );
