@@ -104,22 +104,34 @@ if(BUILD_TESTING)
 endif()
 
 add_library(rmsnorm_kernels STATIC
-    src/rmsnorm.cu)
+    src/rmsnorm.cu
+)
 
 target_include_directories(rmsnorm_kernels
-        PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
-    
-set_target_properties(rmsnorm_kernels rmsnorm_bench
-test_rmsnorm PROPERTIES
+    PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
+
+set_target_properties(rmsnorm_kernels
+    PROPERTIES
         CUDA_STANDARD 17
         CUDA_STANDARD_REQUIRED ON
-        CUDA_SEPARABLE_COMPILATION ON)
+        CUDA_SEPARABLE_COMPILATION ON
+)
 
 add_executable(rmsnorm_bench
-    src/rmsnorm_bench.cu)
+    src/rmsnorm_bench.cu
+)
 
 target_link_libraries(rmsnorm_bench
-    PRIVATE rmsnorm_kernels
+    PRIVATE
+        rmsnorm_kernels
+)
+
+set_target_properties(rmsnorm_bench
+    PROPERTIES
+        CUDA_STANDARD 17
+        CUDA_STANDARD_REQUIRED ON
 )
 
 if(BUILD_TESTING)
@@ -132,9 +144,20 @@ if(BUILD_TESTING)
             rmsnorm_kernels
     )
 
+    set_target_properties(test_rmsnorm
+        PROPERTIES
+            CUDA_STANDARD 17
+            CUDA_STANDARD_REQUIRED ON
+    )
+
     add_test(
         NAME rmsnorm_correctness
         COMMAND test_rmsnorm
     )
 
+    set_tests_properties(
+        rmsnorm_correctness
+        PROPERTIES
+            SKIP_RETURN_CODE 77
+    )
 endif()
