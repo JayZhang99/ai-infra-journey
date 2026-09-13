@@ -31,7 +31,7 @@ const char* rmsnorm_kind_name(RmsNormKind kind) {
 
 __global__ void rmsnorm_baseline_f32(
     const float* x,
-    const float* weight.
+    const float* weight,
     float* y,
     int rows,
     int cols,
