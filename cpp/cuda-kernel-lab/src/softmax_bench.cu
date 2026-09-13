@@ -137,20 +137,18 @@ BenchmarkResult run_benchmark(
 
     // Warmup，不记录。
     for (int i = 0; i < warmup; ++i) {
-        for (int i = 0; i < warmup; ++i) {
-            for (int k = 0; k < launches_per_sample; ++k) {
-                launch_softmax_f32(
-                    device_input,
-                    device_output,
-                    rows,
-                    cols,
-                    threads,
-                    kind,
-                    stream
-                );
-            }
-        } 
-    }
+        for (int k = 0; k < launches_per_sample; ++k) {
+            launch_softmax_f32(
+                device_input,
+                device_output,
+                rows,
+                cols,
+                threads,
+                kind,
+                stream
+            );
+        }
+    } 
 
     cuda_check(
         cudaStreamSynchronize(stream),
