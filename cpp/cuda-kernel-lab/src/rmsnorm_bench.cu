@@ -86,7 +86,7 @@ void cpu_reference(
         double inv = 1.0 / std::sqrt(sum_sq / cols + eps);
         for (int c =0; c < cols; ++c) {
             output[r*cols +c] = input[r*cols +c] * 
-            static_cast<float> inv * weight[c];
+            static_cast<float> (inv) * weight[c];
         }
     }
 
