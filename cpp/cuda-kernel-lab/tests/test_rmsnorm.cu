@@ -31,16 +31,16 @@ std::vector<float> cpu_rmsnorm(
     float eps
 ) {
     std::vector<float> output(input.size());
-    for (int r = 0; r < row; ++r){
+    for (int r = 0; r < rows; ++r){
         double sum_sq = 0.0;
         for (int c = 0; c < cols; ++c) {
             double v = input[r*cols + c];
-            sum_sq += v * v；
+            sum_sq += v * v;
         }
         double inv = 1.0 / std::sqrt(sum_sq / cols + eps);
         for (int c =0; c < cols; ++c) {
             output[r*cols +c] = input[r*cols +c] * 
-            static_cast<float> inv * weight[c];
+            static_cast<float> (inv) * weight[c];
         }
     }
 
@@ -221,12 +221,12 @@ int main() {
             {8, 2048},
         };
 
-        const RmsnormKind kinds[] = {
-            RmsnormKind::Baseline,
-            RmsnormKind::Block,
+        const RmsNormKind kinds[] = {
+            RmsNormKind::Baseline,
+            RmsNormKind::Block,
         };
 
-        for (RmsnormKind kind : kinds) {
+        for (RmsNormKind kind : kinds) {
             for (const auto& [rows, cols] : cases) {
                 run_case(rows, cols, kind);
             }
