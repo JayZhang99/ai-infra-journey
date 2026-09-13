@@ -102,3 +102,38 @@ if(BUILD_TESTING)
         PROPERTIES SKIP_RETURN_CODE 77
     )
 endif()
+
+add_library(rmsnorm_kernels STATIC
+    src/rmsnorm.cu)
+
+target_include_directories(rmsnorm_kernels
+        PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+    
+set_target_properties(rmsnorm_kernels PROPERTIES
+        CUDA_STANDARD 17
+        CUDA_STANDARD_REQUIRED ON
+        CUDA_SEPARABLE_COMPILATION ON)
+
+add_executable(rmsnorm_bench
+    src/rmsnorm_bench.cu)
+
+target_link_libraries(rmsnorm_bench
+    PRIVATE rmsnorm_kernels
+)
+
+if(BUILD_TESTING)
+    add_executable(test_rmsnorm
+        tests/test_rmsnorm.cu
+    )
+
+    target_link_libraries(test_rmsnorm
+        PRIVATE
+            rmsnorm_kernels
+    )
+
+    add_test(
+        NAME rmsnorm_correctness
+        COMMAND test_rmsnorm
+    )
+
+endif()
