@@ -81,7 +81,7 @@ __device__ float block_sum(float value) {
 
     value = warp_sum(value, __activemask());
     if (lane == 0) {
-        warp_values[wrap] = value;
+        warp_values[warp] = value;
     }
     __syncthreads();
 
@@ -100,7 +100,7 @@ __device__ float block_sum(float value) {
 
 __global__ rmsnorm_block_f32(
     const float* x,
-    const float* weight.
+    const float* weight,
     float* y,
     int rows,
     int cols,
@@ -133,7 +133,7 @@ __global__ rmsnorm_block_f32(
 
 void launch_rmsnorm_f32(
     const float* input,
-    const float* weight.
+    const float* weight,
     float* output,
     int rows,
     int cols,
