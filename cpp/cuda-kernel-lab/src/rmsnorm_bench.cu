@@ -315,7 +315,7 @@ int main(int argc, char** argv) {
         const std::string output_path =
             argc > 1
                 ? argv[1]
-                : "rmsnorm_benchmark.json";
+                : "benchmarks/rmsnorm/runs/rmsnorm_benchmark.json";
 
         constexpr int threads = 256;
         constexpr int warmup = 10;

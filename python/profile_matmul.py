@@ -229,7 +229,7 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 def trace_handler(prof):
-    output_dir = Path("benchmarks/profiler")
+    output_dir = Path("benchmarks/matmul/profiles")
     output_dir.mkdir(parents=True, exist_ok=True)
 
     sort_by = (

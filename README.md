@@ -35,7 +35,7 @@ AI Infra 基础与性能指标
 ├── cpp/
 │   ├── CMakeLists.txt        # C++20 target 与 CTest
 │   └── src/main.cpp
-├── benchmarks/         # 原始性能数据
+├── benchmarks/         # 按算子分类的运行、Profiler 与汇总数据
 ├── reports/            # 可复现报告
 └── environment.md      # 双机环境基线
 ```

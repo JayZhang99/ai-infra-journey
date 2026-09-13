@@ -259,7 +259,7 @@ int main(int argc, char** argv) {
         const std::string output_path =
             argc > 1
                 ? argv[1]
-                : "softmax_benchmark.json";
+                : "benchmarks/softmax/runs/softmax_benchmark.json";
 
         constexpr int threads = 256;
         constexpr int warmup = 10;

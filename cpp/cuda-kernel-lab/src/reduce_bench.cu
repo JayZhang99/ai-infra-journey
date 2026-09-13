@@ -23,7 +23,7 @@ struct Args {
     int repeats = 100;
 
     std::filesystem::path output =
-        "benchmarks/cuda/reduction.json";
+        "benchmarks/reduction/runs/reduction.json";
 };
 
 
