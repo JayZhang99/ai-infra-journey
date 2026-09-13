@@ -109,7 +109,8 @@ add_library(rmsnorm_kernels STATIC
 target_include_directories(rmsnorm_kernels
         PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
     
-set_target_properties(rmsnorm_kernels PROPERTIES
+set_target_properties(rmsnorm_kernels rmsnorm_bench
+test_rmsnorm PROPERTIES
         CUDA_STANDARD 17
         CUDA_STANDARD_REQUIRED ON
         CUDA_SEPARABLE_COMPILATION ON)

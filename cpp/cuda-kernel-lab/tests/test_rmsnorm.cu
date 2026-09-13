@@ -54,13 +54,16 @@ void run_case(
 ) {
     const std::size_t count =
         static_cast<std::size_t>(rows) * cols;
-    const std::size_t bytes =
-        count * sizeof(float);
+    const std::size_t tensor_bytes =
+        static_cast<std::size_t>(rows) * cols * sizeof(float);
+
+    const std::size_t weight_bytes =
+        static_cast<std::size_t>(cols) * sizeof(float);
 
     std::vector<float> input(count);
     std::vector<float> weight(cols);
 
-    float eps = std::sin(0,01f);
+    float eps = 1e-6;
 
     for (int row = 0; row < rows; ++row) {
         for (int col = 0; col < cols; ++col) {
@@ -82,8 +85,7 @@ void run_case(
     }
 
     for (std::size_t i = 0; i < cols; ++i) {
-        weight[i] =
-            std::sin(static_cast<float>(i) * 0.01f);
+        weight[i] = 0.5f + 0.01f * static_cast<float>(i % 17);
     }
 
 
@@ -93,11 +95,16 @@ void run_case(
     float* device_input = nullptr;
     float* device_output = nullptr;
     float* device_weight = nullptr;
+    cudaStream_t stream = nullptr;
 
+    cuda_check(
+        cudaStreamCreate(&stream),
+        "create stream"
+    );
     cuda_check(
         cudaMalloc(
             reinterpret_cast<void**>(&device_input),
-            bytes
+            tensor_bytes
         ),
         "cudaMalloc input"
     );
@@ -105,7 +112,7 @@ void run_case(
     cuda_check(
         cudaMalloc(
             reinterpret_cast<void**>(&device_weight),
-            bytes
+            weight_bytes
         ),
         "cudaMalloc weight"
     );
@@ -113,7 +120,7 @@ void run_case(
     cuda_check(
         cudaMalloc(
             reinterpret_cast<void**>(&device_output),
-            bytes
+            tensor_bytes
         ),
         "cudaMalloc output"
     );
@@ -122,7 +129,7 @@ void run_case(
         cudaMemcpy(
             device_input,
             input.data(),
-            bytes,
+            tensor_bytes,
             cudaMemcpyHostToDevice
         ),
         "copy input"
@@ -132,7 +139,7 @@ void run_case(
         cudaMemcpy(
             device_weight,
             weight.data(),
-            bytes,
+            weight_bytes,
             cudaMemcpyHostToDevice
         ),
         "copy weight"
@@ -158,7 +165,7 @@ void run_case(
         cudaMemcpy(
             actual.data(),
             device_output,
-            bytes,
+            tensor_bytes,
             cudaMemcpyDeviceToHost
         ),
         "copy output"
@@ -184,7 +191,7 @@ void run_case(
     cudaFree(device_output);
     cudaFree(device_input);
     cudaFree(device_weight);
-
+    cudaStreamDestroy(stream);
         std::cout
         << "PASSED"
         << " kind=" << rmsnorm_kind_name(kind)
@@ -228,13 +235,15 @@ int main() {
         bool rejected_null = false;
 
         try {
-            launch_rmsnorm_f32(
+           launch_rmsnorm_f32(
+                nullptr,
                 nullptr,
                 nullptr,
                 1,
                 32,
+                1e-6f,
                 32,
-                SoftmaxKind::Block
+                RmsNormKind::Block
             );
         } catch (const std::invalid_argument&) {
             rejected_null = true;

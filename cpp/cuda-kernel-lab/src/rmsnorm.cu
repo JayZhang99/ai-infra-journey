@@ -4,6 +4,7 @@
 
 #include <stdexcept>
 #include <string>
+#include <cmath>
 
 namespace {
     void cuda_check(cudaError_t error, const char* operation) {
@@ -139,7 +140,7 @@ void launch_rmsnorm_f32(
     float eps,
     int threads,
     RmsNormKind kind,
-    cudaStream_t stream = nullptr
+    cudaStream_t stream
 ) {
     if (input == nullptr ||
         output == nullptr ||
@@ -200,7 +201,7 @@ void launch_rmsnorm_f32(
                 rows,
                 cols,
                 eps
-            )
+            );
             break;
         }
             

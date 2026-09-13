@@ -21,7 +21,7 @@ struct BenchmarkResult{
     std::vector<float> samples_ms;
     float median_ms;
     float p95_ms;
-}
+};
 
 namespace {
 
@@ -77,11 +77,11 @@ void cpu_reference(
     int cols,
     float eps
 ) {
-    for (int r = 0; r < row; ++r){
+    for (int r = 0; r < rows; ++r){
         double sum_sq = 0.0;
         for (int c = 0; c < cols; ++c) {
             double v = input[r*cols + c];
-            sum_sq += v * v；
+            sum_sq += v * v;
         }
         double inv = 1.0 / std::sqrt(sum_sq / cols + eps);
         for (int c =0; c < cols; ++c) {
@@ -103,8 +103,12 @@ BenchmarkResult run_benchmark(
 ) {
     const std::size_t count =
         static_cast<std::size_t>(rows) * cols;
-    const std::size_t bytes =
-        count * sizeof(float);
+
+    const std::size_t tensor_bytes =
+    static_cast<std::size_t>(rows) * cols * sizeof(float);
+
+const std::size_t weight_bytes =
+    static_cast<std::size_t>(cols) * sizeof(float);
     
     std::vector<float> input(count);
     std::vector<float> weight(cols);
@@ -130,7 +134,7 @@ BenchmarkResult run_benchmark(
     cuda_check(
         cudaMalloc(
             reinterpret_cast<void**>(&device_input),
-            bytes
+            tensor_bytes
         ),
         "cudaMalloc input"
     );
@@ -138,7 +142,7 @@ BenchmarkResult run_benchmark(
     cuda_check(
         cudaMalloc(
             reinterpret_cast<void**>(&device_weight),
-            bytes
+            weight_bytes
         ),
         "cudaMalloc weight"
     );
@@ -146,7 +150,7 @@ BenchmarkResult run_benchmark(
     cuda_check(
         cudaMalloc(
             reinterpret_cast<void**>(&device_output),
-            bytes
+            tensor_bytes
         ),
         "cudaMalloc output"
     );
@@ -155,7 +159,7 @@ BenchmarkResult run_benchmark(
         cudaMemcpy(
             device_input,
             input.data(),
-            bytes,
+            tensor_bytes,
             cudaMemcpyHostToDevice
         ),
         "copy input"
@@ -165,7 +169,7 @@ BenchmarkResult run_benchmark(
         cudaMemcpy(
             device_weight,
             weight.data(),
-            bytes,
+            weight_bytes,
             cudaMemcpyHostToDevice
         ),
         "copy weight"
@@ -264,14 +268,14 @@ BenchmarkResult run_benchmark(
         cudaMemcpy(
             output.data(),
             device_output,
-            bytes,
+            tensor_bytes,
             cudaMemcpyDeviceToHost
         ),
         "copy output"
     );
 
     std::vector<float> reference(count);
-    cpu_reference(input, weight, reference, rows, cols, eps);
+    cpu_reference(input.data(), weight.data(), reference.data(), rows, cols, eps);
 
     for(size_t i = 0; i < count; ++i) {
         float expected = reference[i];
@@ -304,6 +308,7 @@ BenchmarkResult run_benchmark(
         percentile(samples, 0.95),
     };
 }
+}
 
 int main(int argc, char** argv) {
     try {
@@ -326,16 +331,16 @@ int main(int argc, char** argv) {
         };
 
 
-        const SoftmaxKind kinds[] = {
-            SoftmaxKind::Baseline,
-            SoftmaxKind::Block,
+        const RmsNormKind kinds[] = {
+            RmsNormKind::Baseline,
+            RmsNormKind::Block,
         };
 
         std::vector<BenchmarkResult> results;
 
         for (int rows : row_values) {
             for (int cols : col_values) {
-                for (SoftmaxKind kind : kinds) {
+                for (RmsNormKind kind : kinds) {
                     results.push_back(
                         run_benchmark(
                             rows,
@@ -358,7 +363,7 @@ int main(int argc, char** argv) {
             << "  \"schema_version\": 1,\n"
             << "  \"benchmark\": \"rmsnorm_f32\",\n"
             << "  \"measurement\": "
-            << std::quoted("amortized_per_launch")
+            << std::quoted("batched_average_per_launch")
             << ",\n"
             << "  \"time_unit\": \"ms\",\n"
             << "  \"warmup_batches\": "
@@ -384,12 +389,12 @@ int main(int argc, char** argv) {
                 << result.threads << ",\n"
                 << "      \"kind\": "
                 << std::quoted(
-                    softmax_kind_name(result.kind)
+                    rmsnorm_kind_name(result.kind)
                 )
                 << ",\n"
                 << "      \"median_per_launch_ms\": "
                 << result.median_ms << ",\n"
-                << "      \"p95_batch_average_ms\": "
+                << "      \"p95_sample_mean_per_launch_ms\": "
                 << result.p95_ms << ",\n"
                 << "      \"samples_per_launch_ms\": [";
 
@@ -424,5 +429,4 @@ int main(int argc, char** argv) {
 
         return 1;
     }
-}
 }
