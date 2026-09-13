@@ -161,3 +161,67 @@ if(BUILD_TESTING)
             SKIP_RETURN_CODE 77
     )
 endif()
+
+add_library(transpose_kernels STATIC
+    src/transpose.cu
+)
+
+target_include_directories(transpose_kernels
+    PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
+
+target_compile_options(transpose_kernels
+    PRIVATE
+        $<$<COMPILE_LANGUAGE:CUDA>:-lineinfo>
+)
+
+set_target_properties(transpose_kernels
+    PROPERTIES
+        CUDA_STANDARD 17
+        CUDA_STANDARD_REQUIRED ON
+        CUDA_SEPARABLE_COMPILATION ON
+)
+
+add_executable(transpose_bench
+    src/transpose_bench.cu
+)
+
+target_link_libraries(transpose_bench
+    PRIVATE
+        transpose_kernels
+)
+
+set_target_properties(transpose_bench
+    PROPERTIES
+        CUDA_STANDARD 17
+        CUDA_STANDARD_REQUIRED ON
+)
+
+if(BUILD_TESTING)
+    add_executable(test_transpose
+        tests/test_transpose.cu
+    )
+
+    target_link_libraries(test_transpose
+        PRIVATE
+            transpose_kernels
+    )
+
+    set_target_properties(test_transpose
+        PROPERTIES
+            CUDA_STANDARD 17
+            CUDA_STANDARD_REQUIRED ON
+    )
+
+    add_test(
+        NAME transpose_correctness
+        COMMAND test_transpose
+    )
+
+    set_tests_properties(
+        transpose_correctness
+        PROPERTIES
+            SKIP_RETURN_CODE 77
+    )
+endif()
