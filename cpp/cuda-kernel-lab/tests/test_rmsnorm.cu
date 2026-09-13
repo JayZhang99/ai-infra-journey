@@ -62,6 +62,18 @@ struct TestDeviceResources {
     }
 };
 
+void cuda_check(
+    cudaError_t error,
+    const char* operation
+) {
+    if (error != cudaSuccess) {
+        throw std::runtime_error(
+            std::string(operation) + ": " +
+            cudaGetErrorString(error)
+        );
+    }
+}
+
 void test_zero_input(
     int rows,
     int cols,
@@ -471,18 +483,6 @@ void test_invalid_arguments() {
     );
 }
 
-void cuda_check(
-    cudaError_t error,
-    const char* operation
-) {
-    if (error != cudaSuccess) {
-        throw std::runtime_error(
-            std::string(operation) + ": " +
-            cudaGetErrorString(error)
-        );
-    }
-}
-
 std::vector<float> cpu_rmsnorm(
     const std::vector<float>& input,
     const std::vector<float>& weight,
@@ -699,7 +699,7 @@ int main() {
         }
 
         test_invalid_arguments();
-        
+
         std::cout << "PASSED: all rmsnorm checks\n";
         return 0;
     } catch (const std::exception& error) {
