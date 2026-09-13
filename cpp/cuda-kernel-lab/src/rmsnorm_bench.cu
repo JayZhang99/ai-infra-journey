@@ -12,6 +12,7 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
+#include <sstream>
 
 struct BenchmarkResult{
     int rows;
@@ -23,7 +24,92 @@ struct BenchmarkResult{
     float p95_ms;
 };
 
+struct BenchmarkArgs {
+    std::string output_path;
+    std::string run_id;
+    std::string git_revision;
+    std::string nvidia_driver_version;
+};
+
+struct EnvironmentMetadata {
+    int device_ordinal;
+    std::string gpu_name;
+    int compute_capability_major;
+    int compute_capability_minor;
+    int multiprocessor_count;
+    int max_threads_per_block;
+    std::size_t total_global_memory_bytes;
+    std::string cuda_compiled_version;
+    std::string cuda_runtime_version;
+    std::string cuda_driver_api_version;
+};
+
 namespace {
+
+BenchmarkArgs parse_args(
+    int argc,
+    char** argv
+) {
+    if (argc != 5) {
+        throw std::invalid_argument(
+            "usage: rmsnorm_bench "
+            "<output.json> "
+            "<run_id> "
+            "<git_revision> "
+            "<nvidia_driver_version>"
+        );
+    }
+
+    BenchmarkArgs args{
+        argv[1],
+        argv[2],
+        argv[3],
+        argv[4],
+    };
+
+    if (args.output_path.empty()) {
+        throw std::invalid_argument(
+            "output path must not be empty"
+        );
+    }
+
+    if (args.run_id.empty()) {
+        throw std::invalid_argument(
+            "run id must not be empty"
+        );
+    }
+
+    if (args.git_revision.empty()) {
+        throw std::invalid_argument(
+            "git revision must not be empty"
+        );
+    }
+
+    if (args.nvidia_driver_version.empty()) {
+        throw std::invalid_argument(
+            "NVIDIA driver version must not be empty"
+        );
+    }
+
+    return args;
+}
+
+std::string format_cuda_version(
+    int encoded_version
+) {
+    const int major =
+        encoded_version / 1000;
+
+    const int minor =
+        (encoded_version % 1000) / 10;
+
+    std::ostringstream stream;
+    stream << major << '.' << minor;
+    return stream.str();
+}
+
+
+
 
 void cuda_check(
     cudaError_t error,
@@ -36,6 +122,57 @@ void cuda_check(
         );
     }
 }
+
+EnvironmentMetadata read_environment() {
+    int device = 0;
+
+    cuda_check(
+        cudaGetDevice(&device),
+        "get CUDA device"
+    );
+
+    cudaDeviceProp properties{};
+
+    cuda_check(
+        cudaGetDeviceProperties(
+            &properties,
+            device
+        ),
+        "get CUDA device properties"
+    );
+
+    int runtime_version = 0;
+
+    cuda_check(
+        cudaRuntimeGetVersion(
+            &runtime_version
+        ),
+        "get CUDA runtime version"
+    );
+
+    int driver_api_version = 0;
+
+    cuda_check(
+        cudaDriverGetVersion(
+            &driver_api_version
+        ),
+        "get CUDA driver API version"
+    );
+
+    return EnvironmentMetadata{
+        device,
+        properties.name,
+        properties.major,
+        properties.minor,
+        properties.multiProcessorCount,
+        properties.maxThreadsPerBlock,
+        properties.totalGlobalMem,
+        format_cuda_version(CUDART_VERSION),
+        format_cuda_version(runtime_version),
+        format_cuda_version(driver_api_version),
+    };
+}
+
 float percentile(
     std::vector<float> values,
     double percentile_value
@@ -95,6 +232,7 @@ void cpu_reference(
 BenchmarkResult run_benchmark(
     int rows,
     int cols,
+    float eps,
     int threads,
     RmsNormKind kind,
     int warmup,
@@ -112,9 +250,6 @@ const std::size_t weight_bytes =
     
     std::vector<float> input(count);
     std::vector<float> weight(cols);
-    float eps = 1e-6;
-
-
 
     for (std::size_t i = 0; i < count; ++i) {
         input[i] =
@@ -312,15 +447,42 @@ const std::size_t weight_bytes =
 
 int main(int argc, char** argv) {
     try {
-        const std::string output_path =
-            argc > 1
-                ? argv[1]
-                : "benchmarks/rmsnorm/runs/rmsnorm_benchmark.json";
+
+        const BenchmarkArgs args =
+            parse_args(argc, argv);
+
+        const EnvironmentMetadata environment =
+            read_environment();
+
+        const std::filesystem::path output_path(
+            args.output_path
+        );
+
+        const std::filesystem::path parent =
+            output_path.parent_path();
+
+        if (!parent.empty()) {
+            std::filesystem::create_directories(
+                parent
+            );
+        }
+
+        std::ofstream output(output_path);
+
+        if (!output.is_open()) {
+            throw std::runtime_error(
+                "failed to open output file: " +
+                output_path.string()
+            );
+        }
+
+        output << std::setprecision(9);
 
         constexpr int threads = 256;
         constexpr int warmup = 10;
         constexpr int repeats = 100;
         constexpr int launches_per_sample = 200;
+        constexpr float eps = 1e-6f;
 
         const int row_values[] = {
             1, 32, 256
@@ -345,6 +507,7 @@ int main(int argc, char** argv) {
                         run_benchmark(
                             rows,
                             cols,
+                            eps,
                             threads,
                             kind,
                             warmup,
@@ -356,22 +519,134 @@ int main(int argc, char** argv) {
             }
         }
 
-        std::ofstream output(output_path);
-
         output
             << "{\n"
-            << "  \"schema_version\": 1,\n"
+            << "  \"schema_version\": 2,\n"
             << "  \"benchmark\": \"rmsnorm_f32\",\n"
-            << "  \"measurement\": "
-            << std::quoted("batched_average_per_launch")
+
+            << "  \"run_id\": "
+            << std::quoted(args.run_id)
             << ",\n"
+
+            << "  \"git_revision\": "
+            << std::quoted(args.git_revision)
+            << ",\n"
+
+            << "  \"environment\": {\n"
+
+            << "    \"device_ordinal\": "
+            << environment.device_ordinal
+            << ",\n"
+
+            << "    \"gpu_name\": "
+            << std::quoted(environment.gpu_name)
+            << ",\n"
+
+            << "    \"compute_capability\": "
+            << std::quoted(
+                std::to_string(
+                    environment.compute_capability_major
+                ) +
+                "." +
+                std::to_string(
+                    environment.compute_capability_minor
+                )
+            )
+            << ",\n"
+
+            << "    \"multiprocessor_count\": "
+            << environment.multiprocessor_count
+            << ",\n"
+
+            << "    \"max_threads_per_block\": "
+            << environment.max_threads_per_block
+            << ",\n"
+
+            << "    \"total_global_memory_bytes\": "
+            << environment.total_global_memory_bytes
+            << ",\n"
+
+            << "    \"nvidia_driver_version\": "
+            << std::quoted(
+                args.nvidia_driver_version
+            )
+            << ",\n"
+
+            << "    \"cuda_compiled_version\": "
+            << std::quoted(
+                environment.cuda_compiled_version
+            )
+            << ",\n"
+
+            << "    \"cuda_runtime_version\": "
+            << std::quoted(
+                environment.cuda_runtime_version
+            )
+            << ",\n"
+
+            << "    \"cuda_driver_api_version\": "
+            << std::quoted(
+                environment.cuda_driver_api_version
+            )
+            << "\n"
+
+            << "  },\n"
+
+            << "  \"storage_dtype\": \"float32\",\n"
+            << "  \"accumulator_dtype\": \"float32\",\n"
+
+            << "  \"eps\": "
+            << eps
+            << ",\n"
+
+            << "  \"input_pattern\": "
+            << std::quoted("sin(index * 0.01)")
+            << ",\n"
+
+            << "  \"correctness_check\": "
+            << std::quoted(
+                "cpu_reference_once_after_timing_per_case"
+            )
+            << ",\n"
+
+            << "  \"workload_order\": "
+            << std::quoted(
+                "rows_then_cols_then_baseline_block"
+            )
+            << ",\n"
+
+            << "  \"measurement\": "
+            << std::quoted(
+                "batched_average_per_launch"
+            )
+            << ",\n"
+
+            << "  \"timer\": "
+            << std::quoted(
+                "cuda_event_same_stream"
+            )
+            << ",\n"
+
+            << "  \"synchronization\": "
+            << std::quoted(
+                "cudaEventSynchronize_stop"
+            )
+            << ",\n"
+
             << "  \"time_unit\": \"ms\",\n"
+
             << "  \"warmup_batches\": "
-            << warmup << ",\n"
+            << warmup
+            << ",\n"
+
             << "  \"repeats\": "
-            << repeats << ",\n"
+            << repeats
+            << ",\n"
+
             << "  \"launches_per_sample\": "
-            << launches_per_sample << ",\n"
+            << launches_per_sample
+            << ",\n"
+
             << "  \"results\": [\n";
 
         for (std::size_t i = 0;
@@ -419,6 +694,22 @@ int main(int argc, char** argv) {
         }
 
         output << "  ]\n}\n";
+
+        output.flush();
+
+        if (!output.good()) {
+            throw std::runtime_error(
+                "failed while writing output file: " +
+                output_path.string()
+            );
+        }
+
+        output.close();
+
+        std::cout
+            << "WROTE benchmark JSON: "
+            << output_path
+            << '\n';
 
         return 0;
     } catch (const std::exception& error) {
