@@ -98,7 +98,7 @@ __device__ float block_sum(float value) {
     return result;
 }
 
-__global__ rmsnorm_block_f32(
+__global__ void rmsnorm_block_f32(
     const float* x,
     const float* weight,
     float* y,
@@ -107,13 +107,13 @@ __global__ rmsnorm_block_f32(
     float eps
 ) {
     int row = blockIdx.x;
-    int tid = thradIdx.x;
+    int tid = threadIdx.x;
     if(row >= rows) return;
 
     const float* in = row * cols + x;
     float* out = y + row  * cols;
 
-    flaot local_sq = 0.0f;
+    float local_sq = 0.0f;
     for(int c = tid; c< cols; c += blockDim.x) {
         float v = in[c];
         local_sq += v * v;
@@ -189,12 +189,13 @@ void launch_rmsnorm_f32(
             break;
         }
 
-        case msNormKind::Block: {
+        case RmsNormKind::Block: {
             rmsnorm_block_f32<<<
             rows,
             threads,
             0,
-            strcasecmp>>>(
+            stream
+            >>>(
                 input,
                 weight,
                 output,
