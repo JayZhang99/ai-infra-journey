@@ -38,7 +38,7 @@ const char* transpose_kind_name(TransposeKind kind) {
 }
 
 __global__ void transpose_naive_f32(
-    const float* input, float* output, int height, int weight
+    const float* input, float* output, int height, int width
 ) {
     const int input_col =
         blockIdx.x * kTile +
@@ -146,7 +146,7 @@ void launch_transpose_f32(
     const float* input,
     float* output,
     int height,
-    int weight,
+    int width,
     int threads,
     TransposeKind kind,
     cudaStream_t stream
@@ -158,7 +158,7 @@ void launch_transpose_f32(
         );
     }
 
-    if (h <= 0 || w <=0) {
+    if (height <= 0 || width <=0) {
         throw std::invalid_argument(
             "heights and weights must be positvie"
         );
