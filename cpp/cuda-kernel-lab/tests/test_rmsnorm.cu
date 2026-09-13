@@ -9,8 +9,468 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <limits>
 
 namespace {
+
+template <typename Fn>
+void expect_invalid_argument(
+    const std::string& case_name,
+    Fn&& fn
+) {
+    try {
+        std::forward<Fn>(fn)();
+    } catch (const std::invalid_argument&) {
+        std::cout
+            << "PASSED invalid case: "
+            << case_name
+            << '\n';
+        return;
+    } catch (const std::exception& error) {
+        throw std::runtime_error(
+            case_name +
+            " threw wrong exception type: " +
+            error.what()
+        );
+    }
+
+    throw std::runtime_error(
+        case_name +
+        " did not throw std::invalid_argument"
+    );
+}
+
+struct TestDeviceResources {
+    float* input = nullptr;
+    float* weight = nullptr;
+    float* output = nullptr;
+    cudaStream_t stream = nullptr;
+
+    ~TestDeviceResources() {
+        if (output != nullptr) {
+            cudaFree(output);
+        }
+        if (weight != nullptr) {
+            cudaFree(weight);
+        }
+        if (input != nullptr) {
+            cudaFree(input);
+        }
+        if (stream != nullptr) {
+            cudaStreamDestroy(stream);
+        }
+    }
+};
+
+void test_zero_input(
+    int rows,
+    int cols,
+    RmsNormKind kind
+) {
+    const std::size_t count =
+        static_cast<std::size_t>(rows) * cols;
+
+    const std::size_t tensor_bytes =
+        count * sizeof(float);
+
+    const std::size_t weight_bytes =
+        static_cast<std::size_t>(cols) *
+        sizeof(float);
+
+    std::vector<float> input(count, 0.0f);
+    std::vector<float> weight(cols);
+    std::vector<float> actual(
+        count,
+        std::numeric_limits<float>::quiet_NaN()
+    );
+
+    for (int c = 0; c < cols; ++c) {
+        weight[c] =
+            0.5f +
+            0.01f * static_cast<float>(c % 17);
+    }
+
+    TestDeviceResources device;
+
+    cuda_check(
+        cudaStreamCreate(&device.stream),
+        "create zero-case stream"
+    );
+
+    cuda_check(
+        cudaMalloc(
+            reinterpret_cast<void**>(&device.input),
+            tensor_bytes
+        ),
+        "allocate zero-case input"
+    );
+
+    cuda_check(
+        cudaMalloc(
+            reinterpret_cast<void**>(&device.weight),
+            weight_bytes
+        ),
+        "allocate zero-case weight"
+    );
+
+    cuda_check(
+        cudaMalloc(
+            reinterpret_cast<void**>(&device.output),
+            tensor_bytes
+        ),
+        "allocate zero-case output"
+    );
+
+    cuda_check(
+        cudaMemcpyAsync(
+            device.input,
+            input.data(),
+            tensor_bytes,
+            cudaMemcpyHostToDevice,
+            device.stream
+        ),
+        "copy zero input"
+    );
+
+    cuda_check(
+        cudaMemcpyAsync(
+            device.weight,
+            weight.data(),
+            weight_bytes,
+            cudaMemcpyHostToDevice,
+            device.stream
+        ),
+        "copy zero-case weight"
+    );
+
+    // 先写入 NaN，用来检测 Kernel 是否漏写输出。
+    cuda_check(
+        cudaMemcpyAsync(
+            device.output,
+            actual.data(),
+            tensor_bytes,
+            cudaMemcpyHostToDevice,
+            device.stream
+        ),
+        "initialize zero-case output"
+    );
+
+    launch_rmsnorm_f32(
+        device.input,
+        device.weight,
+        device.output,
+        rows,
+        cols,
+        1e-6f,
+        256,
+        kind,
+        device.stream
+    );
+
+    cuda_check(
+        cudaMemcpyAsync(
+            actual.data(),
+            device.output,
+            tensor_bytes,
+            cudaMemcpyDeviceToHost,
+            device.stream
+        ),
+        "copy zero-case output"
+    );
+
+    cuda_check(
+        cudaStreamSynchronize(device.stream),
+        "synchronize zero case"
+    );
+
+    for (std::size_t i = 0; i < count; ++i) {
+        if (!std::isfinite(actual[i])) {
+            throw std::runtime_error(
+                "zero input produced non-finite value "
+                "at index " +
+                std::to_string(i)
+            );
+        }
+
+        if (actual[i] != 0.0f) {
+            throw std::runtime_error(
+                "zero input produced non-zero value "
+                "at index " +
+                std::to_string(i)
+            );
+        }
+    }
+
+    std::cout
+        << "PASSED zero input"
+        << " kind=" << rmsnorm_kind_name(kind)
+        << " rows=" << rows
+        << " cols=" << cols
+        << '\n';
+}
+
+void test_invalid_arguments() {
+    constexpr int buffer_elements = 128;
+    constexpr std::size_t bytes =
+        buffer_elements * sizeof(float);
+
+    TestDeviceResources device;
+
+    cuda_check(
+        cudaMalloc(
+            reinterpret_cast<void**>(&device.input),
+            bytes
+        ),
+        "allocate contract input"
+    );
+
+    cuda_check(
+        cudaMalloc(
+            reinterpret_cast<void**>(&device.weight),
+            bytes
+        ),
+        "allocate contract weight"
+    );
+
+    cuda_check(
+        cudaMalloc(
+            reinterpret_cast<void**>(&device.output),
+            bytes
+        ),
+        "allocate contract output"
+    );
+
+    const auto launch = [
+        &device
+    ](
+        int rows,
+        int cols,
+        float eps,
+        int threads,
+        RmsNormKind kind
+    ) {
+        launch_rmsnorm_f32(
+            device.input,
+            device.weight,
+            device.output,
+            rows,
+            cols,
+            eps,
+            threads,
+            kind
+        );
+    };
+
+    // rows 合同
+    expect_invalid_argument(
+        "rows equals zero",
+        [&] {
+            launch(
+                0, 32, 1e-6f, 256,
+                RmsNormKind::Block
+            );
+        }
+    );
+
+    expect_invalid_argument(
+        "rows is negative",
+        [&] {
+            launch(
+                -1, 32, 1e-6f, 256,
+                RmsNormKind::Block
+            );
+        }
+    );
+
+    // cols 合同
+    expect_invalid_argument(
+        "cols equals zero",
+        [&] {
+            launch(
+                1, 0, 1e-6f, 256,
+                RmsNormKind::Block
+            );
+        }
+    );
+
+    expect_invalid_argument(
+        "cols is negative",
+        [&] {
+            launch(
+                1, -1, 1e-6f, 256,
+                RmsNormKind::Block
+            );
+        }
+    );
+
+    // eps 合同
+    expect_invalid_argument(
+        "eps equals zero",
+        [&] {
+            launch(
+                1, 32, 0.0f, 256,
+                RmsNormKind::Block
+            );
+        }
+    );
+
+    expect_invalid_argument(
+        "eps is negative",
+        [&] {
+            launch(
+                1, 32, -1e-6f, 256,
+                RmsNormKind::Block
+            );
+        }
+    );
+
+    expect_invalid_argument(
+        "eps is NaN",
+        [&] {
+            launch(
+                1,
+                32,
+                std::numeric_limits<float>::
+                    quiet_NaN(),
+                256,
+                RmsNormKind::Block
+            );
+        }
+    );
+
+    expect_invalid_argument(
+        "eps is positive infinity",
+        [&] {
+            launch(
+                1,
+                32,
+                std::numeric_limits<float>::
+                    infinity(),
+                256,
+                RmsNormKind::Block
+            );
+        }
+    );
+
+    expect_invalid_argument(
+        "eps is negative infinity",
+        [&] {
+            launch(
+                1,
+                32,
+                -std::numeric_limits<float>::
+                    infinity(),
+                256,
+                RmsNormKind::Block
+            );
+        }
+    );
+
+    // threads 合同
+    expect_invalid_argument(
+        "threads equals zero",
+        [&] {
+            launch(
+                1, 32, 1e-6f, 0,
+                RmsNormKind::Block
+            );
+        }
+    );
+
+    expect_invalid_argument(
+        "threads below one warp",
+        [&] {
+            launch(
+                1, 32, 1e-6f, 31,
+                RmsNormKind::Block
+            );
+        }
+    );
+
+    expect_invalid_argument(
+        "threads is not multiple of 32",
+        [&] {
+            launch(
+                1, 32, 1e-6f, 33,
+                RmsNormKind::Block
+            );
+        }
+    );
+
+    expect_invalid_argument(
+        "threads exceeds 1024",
+        [&] {
+            launch(
+                1, 32, 1e-6f, 1056,
+                RmsNormKind::Block
+            );
+        }
+    );
+
+    // 枚举合同
+    expect_invalid_argument(
+        "unsupported RmsNormKind",
+        [&] {
+            launch(
+                1,
+                32,
+                1e-6f,
+                256,
+                static_cast<RmsNormKind>(999)
+            );
+        }
+    );
+
+    // 每个指针应单独测试，不能只传三个 nullptr。
+    expect_invalid_argument(
+        "null input",
+        [&] {
+            launch_rmsnorm_f32(
+                nullptr,
+                device.weight,
+                device.output,
+                1,
+                32,
+                1e-6f,
+                256,
+                RmsNormKind::Block
+            );
+        }
+    );
+
+    expect_invalid_argument(
+        "null weight",
+        [&] {
+            launch_rmsnorm_f32(
+                device.input,
+                nullptr,
+                device.output,
+                1,
+                32,
+                1e-6f,
+                256,
+                RmsNormKind::Block
+            );
+        }
+    );
+
+    expect_invalid_argument(
+        "null output",
+        [&] {
+            launch_rmsnorm_f32(
+                device.input,
+                device.weight,
+                nullptr,
+                1,
+                32,
+                1e-6f,
+                256,
+                RmsNormKind::Block
+            );
+        }
+    );
+}
+
 void cuda_check(
     cudaError_t error,
     const char* operation
@@ -156,7 +616,7 @@ void run_case(
         stream);
         cuda_check(
         cudaDeviceSynchronize(),
-        "synchronize softmax"
+        "synchronize rmsnorm"
     );
 
     std::vector<float> actual(count);
@@ -232,30 +692,15 @@ int main() {
             }
         }
 
-        bool rejected_null = false;
-
-        try {
-           launch_rmsnorm_f32(
-                nullptr,
-                nullptr,
-                nullptr,
-                1,
-                32,
-                1e-6f,
-                32,
-                RmsNormKind::Block
-            );
-        } catch (const std::invalid_argument&) {
-            rejected_null = true;
+        for (RmsNormKind kind : kinds) {
+            test_zero_input(1, 1, kind);
+            test_zero_input(1, 33, kind);
+            test_zero_input(4, 128, kind);
         }
 
-        if (!rejected_null) {
-            throw std::runtime_error(
-                "null pointer was not rejected"
-            );
-        }
-
-        std::cout << "PASSED: all softmax checks\n";
+        test_invalid_arguments();
+        
+        std::cout << "PASSED: all rmsnorm checks\n";
         return 0;
     } catch (const std::exception& error) {
         std::cerr << "FAILED: " << error.what() << '\n';
