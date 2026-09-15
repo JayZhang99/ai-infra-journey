@@ -16,7 +16,7 @@ __global__ void scale_add_kernel(
     int64_t n,
     float alpha
 ) {
-    int64_t index = static_cast<int64_t>(blockIdx.x) * blickDim.x + threadIdx.x;
+    int64_t index = static_cast<int64_t>(blockIdx.x) * blockDim.x + threadIdx.x;
 
     if(index < n) {
         output[index] = input[index] * alpha + 1.0f;
@@ -56,11 +56,11 @@ at::Tensor scale_add_cuda(
     const int64_t n = x.numel();
 
     if (n==0) {
-        return output;
+        return out;
     }
 
     const int threads = 256;
-    const int blocks = static_cast_<int>((n + threads -1)/ threads);
+    const int blocks = static_cast<int>((n + threads -1)/ threads);
 
 
     cudaStream_t stream = 
