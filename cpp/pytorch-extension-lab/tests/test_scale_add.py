@@ -41,15 +41,6 @@ def test_rejects_non_finite_alpha():
     with pytest.raises(RuntimeError, match="finite"):
         torch.ops.jay_ops.scale_add(x, float("nan"))
 
-@pytest.mark.skipif(
-    not torch.cuda.is_available(),
-    reason = "CUDA is unavailable",
-)
-def test_cuda_has_no_registered_kernel():
-    x = torch.ones(3, device="cuda")
-    with pytest.raises(RuntimeError):
-        torch.ops.jay_ops.scale_add(x, 2.0)
-
 
 def test_scale_add_cpu():
     x = torch.tensor([1.0, 2.0], dtype=torch.float32)
@@ -148,7 +139,7 @@ def test_API_CUDA_CPU():
 def test_curret_stream():
     stream = torch.cuda.Stream()
     with torch.cuda.stream(stream):
-        x = torch.arange(1024, device="cuda")
+        x = torch.arange(1024, device="cuda", dtype=torch.float32)
         y = torch.ops.jay_ops.scale_add(x, 2.0)
         done = torch.cuda.Event()
         done.record()
