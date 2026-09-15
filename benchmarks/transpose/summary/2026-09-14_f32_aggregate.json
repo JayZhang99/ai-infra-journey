@@ -1,0 +1,1076 @@
+{
+  "aggregation_rule": "median of per-run medians; raw samples from different runs are not pooled",
+  "benchmark": "transpose_f32_five_round_aggregate",
+  "limitation": "Observed results apply only to this GPU, driver, git revision and benchmark protocol.",
+  "protocol": {
+    "accumulator_dtype": null,
+    "benchmark": "transpose_f32",
+    "block": [
+      32,
+      8,
+      1
+    ],
+    "git_revision": "6d40946",
+    "launches_per_sample": 100,
+    "logical_bytes_rule": "2*height*width*sizeof(float)",
+    "measurement": "batched_average_per_operation",
+    "nvidia_driver_version": "591.86",
+    "repeats": 50,
+    "schema_version": 2,
+    "storage_dtype": "float32",
+    "time_unit": "ms",
+    "timer": "cuda_event_same_stream",
+    "warmup_batches": 5
+  },
+  "round_count": 5,
+  "schema_version": 1,
+  "shapes": [
+    {
+      "height": 256,
+      "logical_bytes": 524288,
+      "observed_fastest_kind": "padding",
+      "results": [
+        {
+          "effective_gbps_from_mom": 29.568935567329675,
+          "kind": "copy",
+          "per_run": [
+            {
+              "effective_gbps": 24.6264842,
+              "median_ms": 0.0212896001,
+              "p95_batch_mean_ms": 0.0384214409,
+              "run_id": "2026-09-14-r01",
+              "source": "2026-09-14_f32_r01.json",
+              "speedup_vs_naive": 0.8685931212019338
+            },
+            {
+              "effective_gbps": 56.0846219,
+              "median_ms": 0.00934815966,
+              "p95_batch_mean_ms": 0.0228262395,
+              "run_id": "2026-09-14-r02",
+              "source": "2026-09-14_f32_r02.json",
+              "speedup_vs_naive": 0.9349262911498025
+            },
+            {
+              "effective_gbps": 31.1364506,
+              "median_ms": 0.0168383997,
+              "p95_batch_mean_ms": 0.0180847999,
+              "run_id": "2026-09-14-r03",
+              "source": "2026-09-14_f32_r03.json",
+              "speedup_vs_naive": 0.9237457523947481
+            },
+            {
+              "effective_gbps": 21.6256179,
+              "median_ms": 0.0242438391,
+              "p95_batch_mean_ms": 0.0303135999,
+              "run_id": "2026-09-14-r04",
+              "source": "2026-09-14_f32_r04.json",
+              "speedup_vs_naive": 0.6918508050979434
+            },
+            {
+              "effective_gbps": 29.5689355,
+              "median_ms": 0.0177310407,
+              "p95_batch_mean_ms": 0.0291932803,
+              "run_id": "2026-09-14-r05",
+              "source": "2026-09-14_f32_r05.json",
+              "speedup_vs_naive": 0.9422841886545329
+            }
+          ],
+          "run_median_ms": {
+            "count": 5,
+            "max": 0.0242438391,
+            "median": 0.0177310407,
+            "median_abs_deviation": 0.003558559400000001,
+            "min": 0.00934815966,
+            "range": 0.01489567944
+          },
+          "run_p95_batch_mean_ms": {
+            "count": 5,
+            "max": 0.0384214409,
+            "median": 0.0291932803,
+            "median_abs_deviation": 0.006367040799999998,
+            "min": 0.0180847999,
+            "range": 0.020336641
+          },
+          "speedup_vs_naive_from_mom": 0.9422841886545329
+        },
+        {
+          "effective_gbps_from_mom": 31.380061263206077,
+          "kind": "naive",
+          "per_run": [
+            {
+              "effective_gbps": 28.352152,
+              "median_ms": 0.0184920002,
+              "p95_batch_mean_ms": 0.0316211209,
+              "run_id": "2026-09-14-r01",
+              "source": "2026-09-14_f32_r01.json",
+              "speedup_vs_naive": 1.0
+            },
+            {
+              "effective_gbps": 59.9882819,
+              "median_ms": 0.00873984024,
+              "p95_batch_mean_ms": 0.01580384,
+              "run_id": "2026-09-14-r02",
+              "source": "2026-09-14_f32_r02.json",
+              "speedup_vs_naive": 1.0
+            },
+            {
+              "effective_gbps": 33.7067322,
+              "median_ms": 0.0155544002,
+              "p95_batch_mean_ms": 0.0220876783,
+              "run_id": "2026-09-14-r03",
+              "source": "2026-09-14_f32_r03.json",
+              "speedup_vs_naive": 1.0
+            },
+            {
+              "effective_gbps": 31.2576321,
+              "median_ms": 0.0167731196,
+              "p95_batch_mean_ms": 0.02872096,
+              "run_id": "2026-09-14-r04",
+              "source": "2026-09-14_f32_r04.json",
+              "speedup_vs_naive": 1.0
+            },
+            {
+              "effective_gbps": 31.3800613,
+              "median_ms": 0.0167076793,
+              "p95_batch_mean_ms": 0.0226934403,
+              "run_id": "2026-09-14-r05",
+              "source": "2026-09-14_f32_r05.json",
+              "speedup_vs_naive": 1.0
+            }
+          ],
+          "run_median_ms": {
+            "count": 5,
+            "max": 0.0184920002,
+            "median": 0.0167076793,
+            "median_abs_deviation": 0.0011532790999999997,
+            "min": 0.00873984024,
+            "range": 0.009752159960000001
+          },
+          "run_p95_batch_mean_ms": {
+            "count": 5,
+            "max": 0.0316211209,
+            "median": 0.0226934403,
+            "median_abs_deviation": 0.006027519700000001,
+            "min": 0.01580384,
+            "range": 0.0158172809
+          },
+          "speedup_vs_naive_from_mom": 1.0
+        },
+        {
+          "effective_gbps_from_mom": 34.077604026623334,
+          "kind": "tiled",
+          "per_run": [
+            {
+              "effective_gbps": 34.0776039,
+              "median_ms": 0.0153851192,
+              "p95_batch_mean_ms": 0.0172150396,
+              "run_id": "2026-09-14-r01",
+              "source": "2026-09-14_f32_r01.json",
+              "speedup_vs_naive": 1.2019406518475333
+            },
+            {
+              "effective_gbps": 55.1770585,
+              "median_ms": 0.00950192008,
+              "p95_batch_mean_ms": 0.0217577592,
+              "run_id": "2026-09-14-r02",
+              "source": "2026-09-14_f32_r02.json",
+              "speedup_vs_naive": 0.9197972795409998
+            },
+            {
+              "effective_gbps": 34.6403092,
+              "median_ms": 0.0151351998,
+              "p95_batch_mean_ms": 0.0159539208,
+              "run_id": "2026-09-14-r03",
+              "source": "2026-09-14_f32_r03.json",
+              "speedup_vs_naive": 1.027697050950064
+            },
+            {
+              "effective_gbps": 31.992504,
+              "median_ms": 0.0163878389,
+              "p95_batch_mean_ms": 0.0179612804,
+              "run_id": "2026-09-14-r04",
+              "source": "2026-09-14_f32_r04.json",
+              "speedup_vs_naive": 1.023510159109509
+            },
+            {
+              "effective_gbps": 26.5169043,
+              "median_ms": 0.0197718404,
+              "p95_batch_mean_ms": 0.0240230393,
+              "run_id": "2026-09-14-r05",
+              "source": "2026-09-14_f32_r05.json",
+              "speedup_vs_naive": 0.8450239816825549
+            }
+          ],
+          "run_median_ms": {
+            "count": 5,
+            "max": 0.0197718404,
+            "median": 0.0153851192,
+            "median_abs_deviation": 0.0010027196999999998,
+            "min": 0.00950192008,
+            "range": 0.01026992032
+          },
+          "run_p95_batch_mean_ms": {
+            "count": 5,
+            "max": 0.0240230393,
+            "median": 0.0179612804,
+            "median_abs_deviation": 0.0020073596000000013,
+            "min": 0.0159539208,
+            "range": 0.0080691185
+          },
+          "speedup_vs_naive_from_mom": 1.08596359136431
+        },
+        {
+          "effective_gbps_from_mom": 52.674892303426404,
+          "kind": "padding",
+          "per_run": [
+            {
+              "effective_gbps": 63.017811,
+              "median_ms": 0.00831967965,
+              "p95_batch_mean_ms": 0.0314038396,
+              "run_id": "2026-09-14-r01",
+              "source": "2026-09-14_f32_r01.json",
+              "speedup_vs_naive": 2.22268175914682
+            },
+            {
+              "effective_gbps": 52.6748923,
+              "median_ms": 0.00995328091,
+              "p95_batch_mean_ms": 0.0206438396,
+              "run_id": "2026-09-14-r02",
+              "source": "2026-09-14_f32_r02.json",
+              "speedup_vs_naive": 0.8780863635848091
+            },
+            {
+              "effective_gbps": 50.9413176,
+              "median_ms": 0.0102919992,
+              "p95_batch_mean_ms": 0.0176876802,
+              "run_id": "2026-09-14-r03",
+              "source": "2026-09-14_f32_r03.json",
+              "speedup_vs_naive": 1.5113098920567347
+            },
+            {
+              "effective_gbps": 31.2671737,
+              "median_ms": 0.016768001,
+              "p95_batch_mean_ms": 0.0175065603,
+              "run_id": "2026-09-14-r04",
+              "source": "2026-09-14_f32_r04.json",
+              "speedup_vs_naive": 1.000305260000879
+            },
+            {
+              "effective_gbps": 68.3122052,
+              "median_ms": 0.00767488033,
+              "p95_batch_mean_ms": 0.0276985597,
+              "run_id": "2026-09-14-r05",
+              "source": "2026-09-14_f32_r05.json",
+              "speedup_vs_naive": 2.1769302688267453
+            }
+          ],
+          "run_median_ms": {
+            "count": 5,
+            "max": 0.016768001,
+            "median": 0.00995328091,
+            "median_abs_deviation": 0.0016336012600000008,
+            "min": 0.00767488033,
+            "range": 0.009093120670000001
+          },
+          "run_p95_batch_mean_ms": {
+            "count": 5,
+            "max": 0.0314038396,
+            "median": 0.0206438396,
+            "median_abs_deviation": 0.0031372793000000003,
+            "min": 0.0175065603,
+            "range": 0.013897279299999996
+          },
+          "speedup_vs_naive_from_mom": 1.678610244307874
+        }
+      ],
+      "width": 256
+    },
+    {
+      "height": 1000,
+      "logical_bytes": 8192000,
+      "observed_fastest_kind": "tiled",
+      "results": [
+        {
+          "effective_gbps_from_mom": 522.1452928299093,
+          "kind": "copy",
+          "per_run": [
+            {
+              "effective_gbps": 444.471423,
+              "median_ms": 0.0184308812,
+              "p95_batch_mean_ms": 0.0302956793,
+              "run_id": "2026-09-14-r01",
+              "source": "2026-09-14_f32_r01.json",
+              "speedup_vs_naive": 2.3545874247184666
+            },
+            {
+              "effective_gbps": 521.384914,
+              "median_ms": 0.0157120004,
+              "p95_batch_mean_ms": 0.0169964805,
+              "run_id": "2026-09-14-r02",
+              "source": "2026-09-14_f32_r02.json",
+              "speedup_vs_naive": 2.5064256108343788
+            },
+            {
+              "effective_gbps": 972.274984,
+              "median_ms": 0.0084255999,
+              "p95_batch_mean_ms": 0.00943103991,
+              "run_id": "2026-09-14-r03",
+              "source": "2026-09-14_f32_r03.json",
+              "speedup_vs_naive": 4.881940465746539
+            },
+            {
+              "effective_gbps": 522.145293,
+              "median_ms": 0.0156891197,
+              "p95_batch_mean_ms": 0.0257356819,
+              "run_id": "2026-09-14-r04",
+              "source": "2026-09-14_f32_r04.json",
+              "speedup_vs_naive": 2.599304382896639
+            },
+            {
+              "effective_gbps": 525.085116,
+              "median_ms": 0.0156012801,
+              "p95_batch_mean_ms": 0.0316211209,
+              "run_id": "2026-09-14-r05",
+              "source": "2026-09-14_f32_r05.json",
+              "speedup_vs_naive": 2.5322230641830474
+            }
+          ],
+          "run_median_ms": {
+            "count": 5,
+            "max": 0.0184308812,
+            "median": 0.0156891197,
+            "median_abs_deviation": 8.783960000000035e-05,
+            "min": 0.0084255999,
+            "range": 0.010005281299999998
+          },
+          "run_p95_batch_mean_ms": {
+            "count": 5,
+            "max": 0.0316211209,
+            "median": 0.0257356819,
+            "median_abs_deviation": 0.005885438999999999,
+            "min": 0.00943103991,
+            "range": 0.02219008099
+          },
+          "speedup_vs_naive_from_mom": 2.599304382896639
+        },
+        {
+          "effective_gbps_from_mom": 200.8788567686082,
+          "kind": "naive",
+          "per_run": [
+            {
+              "effective_gbps": 188.768282,
+              "median_ms": 0.0433971211,
+              "p95_batch_mean_ms": 0.0458547212,
+              "run_id": "2026-09-14-r01",
+              "source": "2026-09-14_f32_r01.json",
+              "speedup_vs_naive": 1.0
+            },
+            {
+              "effective_gbps": 208.019306,
+              "median_ms": 0.0393809602,
+              "p95_batch_mean_ms": 0.0397510417,
+              "run_id": "2026-09-14-r02",
+              "source": "2026-09-14_f32_r02.json",
+              "speedup_vs_naive": 1.0
+            },
+            {
+              "effective_gbps": 199.157484,
+              "median_ms": 0.0411332771,
+              "p95_batch_mean_ms": 0.042864643,
+              "run_id": "2026-09-14-r03",
+              "source": "2026-09-14_f32_r03.json",
+              "speedup_vs_naive": 1.0
+            },
+            {
+              "effective_gbps": 200.878857,
+              "median_ms": 0.0407807976,
+              "p95_batch_mean_ms": 0.0410623997,
+              "run_id": "2026-09-14-r04",
+              "source": "2026-09-14_f32_r04.json",
+              "speedup_vs_naive": 1.0
+            },
+            {
+              "effective_gbps": 207.36132,
+              "median_ms": 0.0395059213,
+              "p95_batch_mean_ms": 0.04236288,
+              "run_id": "2026-09-14-r05",
+              "source": "2026-09-14_f32_r05.json",
+              "speedup_vs_naive": 1.0
+            }
+          ],
+          "run_median_ms": {
+            "count": 5,
+            "max": 0.0433971211,
+            "median": 0.0407807976,
+            "median_abs_deviation": 0.0012748762999999982,
+            "min": 0.0393809602,
+            "range": 0.004016160899999996
+          },
+          "run_p95_batch_mean_ms": {
+            "count": 5,
+            "max": 0.0458547212,
+            "median": 0.04236288,
+            "median_abs_deviation": 0.0013004802999999968,
+            "min": 0.0397510417,
+            "range": 0.0061036794999999935
+          },
+          "speedup_vs_naive_from_mom": 1.0
+        },
+        {
+          "effective_gbps_from_mom": 860.215065506128,
+          "kind": "tiled",
+          "per_run": [
+            {
+              "effective_gbps": 499.414745,
+              "median_ms": 0.0164032001,
+              "p95_batch_mean_ms": 0.0402310416,
+              "run_id": "2026-09-14-r01",
+              "source": "2026-09-14_f32_r01.json",
+              "speedup_vs_naive": 2.645649680271839
+            },
+            {
+              "effective_gbps": 862.127005,
+              "median_ms": 0.00950208027,
+              "p95_batch_mean_ms": 0.0238291193,
+              "run_id": "2026-09-14-r02",
+              "source": "2026-09-14_f32_r02.json",
+              "speedup_vs_naive": 4.144456695902023
+            },
+            {
+              "effective_gbps": 860.215065,
+              "median_ms": 0.00952319987,
+              "p95_batch_mean_ms": 0.0210268814,
+              "run_id": "2026-09-14-r03",
+              "source": "2026-09-14_f32_r03.json",
+              "speedup_vs_naive": 4.3192705877756605
+            },
+            {
+              "effective_gbps": 849.707911,
+              "median_ms": 0.00964096002,
+              "p95_batch_mean_ms": 0.0293987207,
+              "run_id": "2026-09-14-r04",
+              "source": "2026-09-14_f32_r04.json",
+              "speedup_vs_naive": 4.229951946217074
+            },
+            {
+              "effective_gbps": 875.333386,
+              "median_ms": 0.00935871992,
+              "p95_batch_mean_ms": 0.0159888007,
+              "run_id": "2026-09-14-r05",
+              "source": "2026-09-14_f32_r05.json",
+              "speedup_vs_naive": 4.221295394851394
+            }
+          ],
+          "run_median_ms": {
+            "count": 5,
+            "max": 0.0164032001,
+            "median": 0.00952319987,
+            "median_abs_deviation": 0.00011776015000000001,
+            "min": 0.00935871992,
+            "range": 0.0070444801800000015
+          },
+          "run_p95_batch_mean_ms": {
+            "count": 5,
+            "max": 0.0402310416,
+            "median": 0.0238291193,
+            "median_abs_deviation": 0.005569601399999999,
+            "min": 0.0159888007,
+            "range": 0.024242240900000003
+          },
+          "speedup_vs_naive_from_mom": 4.2822578709565615
+        },
+        {
+          "effective_gbps_from_mom": 566.7729248284269,
+          "kind": "padding",
+          "per_run": [
+            {
+              "effective_gbps": 925.17296,
+              "median_ms": 0.00885456055,
+              "p95_batch_mean_ms": 0.017182719,
+              "run_id": "2026-09-14-r01",
+              "source": "2026-09-14_f32_r01.json",
+              "speedup_vs_naive": 4.90110388369302
+            },
+            {
+              "effective_gbps": 522.422288,
+              "median_ms": 0.0156808011,
+              "p95_batch_mean_ms": 0.0248979218,
+              "run_id": "2026-09-14-r02",
+              "source": "2026-09-14_f32_r02.json",
+              "speedup_vs_naive": 2.51141251960654
+            },
+            {
+              "effective_gbps": 932.553735,
+              "median_ms": 0.00878448039,
+              "p95_batch_mean_ms": 0.0213344004,
+              "run_id": "2026-09-14-r03",
+              "source": "2026-09-14_f32_r03.json",
+              "speedup_vs_naive": 4.682494043338629
+            },
+            {
+              "effective_gbps": 566.772923,
+              "median_ms": 0.0144537603,
+              "p95_batch_mean_ms": 0.0162348803,
+              "run_id": "2026-09-14-r04",
+              "source": "2026-09-14_f32_r04.json",
+              "speedup_vs_naive": 2.821466300364757
+            },
+            {
+              "effective_gbps": 440.649994,
+              "median_ms": 0.0185907185,
+              "p95_batch_mean_ms": 0.0311398413,
+              "run_id": "2026-09-14-r05",
+              "source": "2026-09-14_f32_r05.json",
+              "speedup_vs_naive": 2.125034667164693
+            }
+          ],
+          "run_median_ms": {
+            "count": 5,
+            "max": 0.0185907185,
+            "median": 0.0144537603,
+            "median_abs_deviation": 0.004136958199999999,
+            "min": 0.00878448039,
+            "range": 0.009806238109999999
+          },
+          "run_p95_batch_mean_ms": {
+            "count": 5,
+            "max": 0.0311398413,
+            "median": 0.0213344004,
+            "median_abs_deviation": 0.004151681399999999,
+            "min": 0.0162348803,
+            "range": 0.014904960999999998
+          },
+          "speedup_vs_naive_from_mom": 2.821466300364757
+        }
+      ],
+      "width": 1024
+    },
+    {
+      "height": 1024,
+      "logical_bytes": 8388608,
+      "observed_fastest_kind": "padding",
+      "results": [
+        {
+          "effective_gbps_from_mom": 585.6003901262364,
+          "kind": "copy",
+          "per_run": [
+            {
+              "effective_gbps": 1025.98383,
+              "median_ms": 0.00817616004,
+              "p95_batch_mean_ms": 0.0202355199,
+              "run_id": "2026-09-14-r01",
+              "source": "2026-09-14_f32_r01.json",
+              "speedup_vs_naive": 5.391185982704908
+            },
+            {
+              "effective_gbps": 585.600391,
+              "median_ms": 0.0143247992,
+              "p95_batch_mean_ms": 0.0148880007,
+              "run_id": "2026-09-14-r02",
+              "source": "2026-09-14_f32_r02.json",
+              "speedup_vs_naive": 2.7760753114082046
+            },
+            {
+              "effective_gbps": 1061.95658,
+              "median_ms": 0.00789920054,
+              "p95_batch_mean_ms": 0.0181417596,
+              "run_id": "2026-09-14-r03",
+              "source": "2026-09-14_f32_r03.json",
+              "speedup_vs_naive": 5.111059074340199
+            },
+            {
+              "effective_gbps": 563.950649,
+              "median_ms": 0.01487472,
+              "p95_batch_mean_ms": 0.0280575994,
+              "run_id": "2026-09-14-r04",
+              "source": "2026-09-14_f32_r04.json",
+              "speedup_vs_naive": 2.8028762827132208
+            },
+            {
+              "effective_gbps": 278.001195,
+              "median_ms": 0.0301747192,
+              "p95_batch_mean_ms": 0.0321331173,
+              "run_id": "2026-09-14-r05",
+              "source": "2026-09-14_f32_r05.json",
+              "speedup_vs_naive": 1.3264932188664742
+            }
+          ],
+          "run_median_ms": {
+            "count": 5,
+            "max": 0.0301747192,
+            "median": 0.0143247992,
+            "median_abs_deviation": 0.00614863916,
+            "min": 0.00789920054,
+            "range": 0.02227551866
+          },
+          "run_p95_batch_mean_ms": {
+            "count": 5,
+            "max": 0.0321331173,
+            "median": 0.0202355199,
+            "median_abs_deviation": 0.005347519199999998,
+            "min": 0.0148880007,
+            "range": 0.0172451166
+          },
+          "speedup_vs_naive_from_mom": 2.8184186065239922
+        },
+        {
+          "effective_gbps_from_mom": 207.7762291132715,
+          "kind": "naive",
+          "per_run": [
+            {
+              "effective_gbps": 190.307631,
+              "median_ms": 0.0440791994,
+              "p95_batch_mean_ms": 0.0591552034,
+              "run_id": "2026-09-14-r01",
+              "source": "2026-09-14_f32_r01.json",
+              "speedup_vs_naive": 1.0
+            },
+            {
+              "effective_gbps": 210.945426,
+              "median_ms": 0.0397667214,
+              "p95_batch_mean_ms": 0.0406521596,
+              "run_id": "2026-09-14-r02",
+              "source": "2026-09-14_f32_r02.json",
+              "speedup_vs_naive": 1.0
+            },
+            {
+              "effective_gbps": 207.776229,
+              "median_ms": 0.0403732806,
+              "p95_batch_mean_ms": 0.042936001,
+              "run_id": "2026-09-14-r03",
+              "source": "2026-09-14_f32_r03.json",
+              "speedup_vs_naive": 1.0
+            },
+            {
+              "effective_gbps": 201.20426,
+              "median_ms": 0.0416919999,
+              "p95_batch_mean_ms": 0.0443785638,
+              "run_id": "2026-09-14-r04",
+              "source": "2026-09-14_f32_r04.json",
+              "speedup_vs_naive": 1.0
+            },
+            {
+              "effective_gbps": 209.576039,
+              "median_ms": 0.0400265604,
+              "p95_batch_mean_ms": 0.0445849597,
+              "run_id": "2026-09-14-r05",
+              "source": "2026-09-14_f32_r05.json",
+              "speedup_vs_naive": 1.0
+            }
+          ],
+          "run_median_ms": {
+            "count": 5,
+            "max": 0.0440791994,
+            "median": 0.0403732806,
+            "median_abs_deviation": 0.0006065591999999953,
+            "min": 0.0397667214,
+            "range": 0.004312477999999995
+          },
+          "run_p95_batch_mean_ms": {
+            "count": 5,
+            "max": 0.0591552034,
+            "median": 0.0443785638,
+            "median_abs_deviation": 0.0014425627999999982,
+            "min": 0.0406521596,
+            "range": 0.0185030438
+          },
+          "speedup_vs_naive_from_mom": 1.0
+        },
+        {
+          "effective_gbps_from_mom": 855.4496985181069,
+          "kind": "tiled",
+          "per_run": [
+            {
+              "effective_gbps": 859.685831,
+              "median_ms": 0.00975775998,
+              "p95_batch_mean_ms": 0.0177964792,
+              "run_id": "2026-09-14-r01",
+              "source": "2026-09-14_f32_r01.json",
+              "speedup_vs_naive": 4.5173481916287095
+            },
+            {
+              "effective_gbps": 864.591085,
+              "median_ms": 0.00970239937,
+              "p95_batch_mean_ms": 0.0174044799,
+              "run_id": "2026-09-14-r02",
+              "source": "2026-09-14_f32_r02.json",
+              "speedup_vs_naive": 4.098648167685145
+            },
+            {
+              "effective_gbps": 855.449699,
+              "median_ms": 0.00980607979,
+              "p95_batch_mean_ms": 0.0293888003,
+              "run_id": "2026-09-14-r03",
+              "source": "2026-09-14_f32_r03.json",
+              "speedup_vs_naive": 4.117168273622624
+            },
+            {
+              "effective_gbps": 296.865368,
+              "median_ms": 0.0282572806,
+              "p95_batch_mean_ms": 0.0311120003,
+              "run_id": "2026-09-14-r04",
+              "source": "2026-09-14_f32_r04.json",
+              "speedup_vs_naive": 1.475442753680975
+            },
+            {
+              "effective_gbps": 707.312085,
+              "median_ms": 0.0118598398,
+              "p95_batch_mean_ms": 0.0320809595,
+              "run_id": "2026-09-14-r05",
+              "source": "2026-09-14_f32_r05.json",
+              "speedup_vs_naive": 3.3749663633736433
+            }
+          ],
+          "run_median_ms": {
+            "count": 5,
+            "max": 0.0282572806,
+            "median": 0.00980607979,
+            "median_abs_deviation": 0.00010368042000000015,
+            "min": 0.00970239937,
+            "range": 0.01855488123
+          },
+          "run_p95_batch_mean_ms": {
+            "count": 5,
+            "max": 0.0320809595,
+            "median": 0.0293888003,
+            "median_abs_deviation": 0.0026921591999999987,
+            "min": 0.0174044799,
+            "range": 0.0146764796
+          },
+          "speedup_vs_naive_from_mom": 4.117168273622624
+        },
+        {
+          "effective_gbps_from_mom": 965.7352507154988,
+          "kind": "padding",
+          "per_run": [
+            {
+              "effective_gbps": 1026.56639,
+              "median_ms": 0.0081715202,
+              "p95_batch_mean_ms": 0.0199017599,
+              "run_id": "2026-09-14-r01",
+              "source": "2026-09-14_f32_r01.json",
+              "speedup_vs_naive": 5.394247131641428
+            },
+            {
+              "effective_gbps": 965.735251,
+              "median_ms": 0.00868623983,
+              "p95_batch_mean_ms": 0.0192204788,
+              "run_id": "2026-09-14-r02",
+              "source": "2026-09-14_f32_r02.json",
+              "speedup_vs_naive": 4.578128416700648
+            },
+            {
+              "effective_gbps": 281.705641,
+              "median_ms": 0.0297779199,
+              "p95_batch_mean_ms": 0.0325939208,
+              "run_id": "2026-09-14-r03",
+              "source": "2026-09-14_f32_r03.json",
+              "speedup_vs_naive": 1.3558126536568458
+            },
+            {
+              "effective_gbps": 972.542584,
+              "median_ms": 0.0086254403,
+              "p95_batch_mean_ms": 0.0290918406,
+              "run_id": "2026-09-14-r04",
+              "source": "2026-09-14_f32_r04.json",
+              "speedup_vs_naive": 4.833608308668022
+            },
+            {
+              "effective_gbps": 535.638165,
+              "median_ms": 0.0156609602,
+              "p95_batch_mean_ms": 0.0206332803,
+              "run_id": "2026-09-14-r05",
+              "source": "2026-09-14_f32_r05.json",
+              "speedup_vs_naive": 2.555817771633185
+            }
+          ],
+          "run_median_ms": {
+            "count": 5,
+            "max": 0.0297779199,
+            "median": 0.00868623983,
+            "median_abs_deviation": 0.0005147196299999986,
+            "min": 0.0081715202,
+            "range": 0.0216063997
+          },
+          "run_p95_batch_mean_ms": {
+            "count": 5,
+            "max": 0.0325939208,
+            "median": 0.0206332803,
+            "median_abs_deviation": 0.0014128015000000015,
+            "min": 0.0192204788,
+            "range": 0.013373442000000003
+          },
+          "speedup_vs_naive_from_mom": 4.6479583099422666
+        }
+      ],
+      "width": 1024
+    },
+    {
+      "height": 4096,
+      "logical_bytes": 134217728,
+      "observed_fastest_kind": "copy",
+      "results": [
+        {
+          "effective_gbps_from_mom": 429.0905037844364,
+          "kind": "copy",
+          "per_run": [
+            {
+              "effective_gbps": 426.779095,
+              "median_ms": 0.314489931,
+              "p95_batch_mean_ms": 0.318679035,
+              "run_id": "2026-09-14-r01",
+              "source": "2026-09-14_f32_r01.json",
+              "speedup_vs_naive": 1.9491773108627761
+            },
+            {
+              "effective_gbps": 429.090504,
+              "median_ms": 0.312795848,
+              "p95_batch_mean_ms": 0.313260168,
+              "run_id": "2026-09-14-r02",
+              "source": "2026-09-14_f32_r02.json",
+              "speedup_vs_naive": 1.9645151364029616
+            },
+            {
+              "effective_gbps": 425.403898,
+              "median_ms": 0.315506577,
+              "p95_batch_mean_ms": 0.383406073,
+              "run_id": "2026-09-14-r03",
+              "source": "2026-09-14_f32_r03.json",
+              "speedup_vs_naive": 1.9426384826202847
+            },
+            {
+              "effective_gbps": 430.359849,
+              "median_ms": 0.311873257,
+              "p95_batch_mean_ms": 0.312428176,
+              "run_id": "2026-09-14-r04",
+              "source": "2026-09-14_f32_r04.json",
+              "speedup_vs_naive": 1.9665810781589395
+            },
+            {
+              "effective_gbps": 430.252129,
+              "median_ms": 0.311951339,
+              "p95_batch_mean_ms": 0.312726408,
+              "run_id": "2026-09-14-r05",
+              "source": "2026-09-14_f32_r05.json",
+              "speedup_vs_naive": 1.965770517176719
+            }
+          ],
+          "run_median_ms": {
+            "count": 5,
+            "max": 0.315506577,
+            "median": 0.312795848,
+            "median_abs_deviation": 0.0009225909999999726,
+            "min": 0.311873257,
+            "range": 0.0036333199999999954
+          },
+          "run_p95_batch_mean_ms": {
+            "count": 5,
+            "max": 0.383406073,
+            "median": 0.313260168,
+            "median_abs_deviation": 0.0008319920000000036,
+            "min": 0.312428176,
+            "range": 0.07097789700000001
+          },
+          "speedup_vs_naive_from_mom": 1.9604631868387206
+        },
+        {
+          "effective_gbps_from_mom": 218.87200262931333,
+          "kind": "naive",
+          "per_run": [
+            {
+              "effective_gbps": 218.953449,
+              "median_ms": 0.612996638,
+              "p95_batch_mean_ms": 0.618526697,
+              "run_id": "2026-09-14-r01",
+              "source": "2026-09-14_f32_r01.json",
+              "speedup_vs_naive": 1.0
+            },
+            {
+              "effective_gbps": 218.420564,
+              "median_ms": 0.614492178,
+              "p95_batch_mean_ms": 0.765621126,
+              "run_id": "2026-09-14-r02",
+              "source": "2026-09-14_f32_r02.json",
+              "speedup_vs_naive": 1.0
+            },
+            {
+              "effective_gbps": 218.982535,
+              "median_ms": 0.612915218,
+              "p95_batch_mean_ms": 0.613412142,
+              "run_id": "2026-09-14-r03",
+              "source": "2026-09-14_f32_r03.json",
+              "speedup_vs_naive": 1.0
+            },
+            {
+              "effective_gbps": 218.836566,
+              "median_ms": 0.613324046,
+              "p95_batch_mean_ms": 0.613457918,
+              "run_id": "2026-09-14-r04",
+              "source": "2026-09-14_f32_r04.json",
+              "speedup_vs_naive": 1.0
+            },
+            {
+              "effective_gbps": 218.872003,
+              "median_ms": 0.613224745,
+              "p95_batch_mean_ms": 0.675133467,
+              "run_id": "2026-09-14-r05",
+              "source": "2026-09-14_f32_r05.json",
+              "speedup_vs_naive": 1.0
+            }
+          ],
+          "run_median_ms": {
+            "count": 5,
+            "max": 0.614492178,
+            "median": 0.613224745,
+            "median_abs_deviation": 0.0002281069999999774,
+            "min": 0.612915218,
+            "range": 0.0015769599999999606
+          },
+          "run_p95_batch_mean_ms": {
+            "count": 5,
+            "max": 0.765621126,
+            "median": 0.618526697,
+            "median_abs_deviation": 0.00511455499999991,
+            "min": 0.613412142,
+            "range": 0.15220898399999994
+          },
+          "speedup_vs_naive_from_mom": 1.0
+        },
+        {
+          "effective_gbps_from_mom": 420.00306499154897,
+          "kind": "tiled",
+          "per_run": [
+            {
+              "effective_gbps": 420.196846,
+              "median_ms": 0.319416314,
+              "p95_batch_mean_ms": 0.398571521,
+              "run_id": "2026-09-14-r01",
+              "source": "2026-09-14_f32_r01.json",
+              "speedup_vs_naive": 1.9191149954851714
+            },
+            {
+              "effective_gbps": 416.607275,
+              "median_ms": 0.322168469,
+              "p95_batch_mean_ms": 0.401100814,
+              "run_id": "2026-09-14-r02",
+              "source": "2026-09-14_f32_r02.json",
+              "speedup_vs_naive": 1.9073628772777262
+            },
+            {
+              "effective_gbps": 420.003065,
+              "median_ms": 0.319563687,
+              "p95_batch_mean_ms": 0.320203513,
+              "run_id": "2026-09-14-r03",
+              "source": "2026-09-14_f32_r03.json",
+              "speedup_vs_naive": 1.9179751734432833
+            },
+            {
+              "effective_gbps": 420.461375,
+              "median_ms": 0.319215357,
+              "p95_batch_mean_ms": 0.319498241,
+              "run_id": "2026-09-14-r04",
+              "source": "2026-09-14_f32_r04.json",
+              "speedup_vs_naive": 1.9213488090424173
+            },
+            {
+              "effective_gbps": 406.157149,
+              "median_ms": 0.330457628,
+              "p95_batch_mean_ms": 0.336117148,
+              "run_id": "2026-09-14-r05",
+              "source": "2026-09-14_f32_r05.json",
+              "speedup_vs_naive": 1.8556834312204167
+            }
+          ],
+          "run_median_ms": {
+            "count": 5,
+            "max": 0.330457628,
+            "median": 0.319563687,
+            "median_abs_deviation": 0.0003483300000000078,
+            "min": 0.319215357,
+            "range": 0.011242271000000026
+          },
+          "run_p95_batch_mean_ms": {
+            "count": 5,
+            "max": 0.401100814,
+            "median": 0.336117148,
+            "median_abs_deviation": 0.01661890699999996,
+            "min": 0.319498241,
+            "range": 0.08160257300000001
+          },
+          "speedup_vs_naive_from_mom": 1.9189437659730095
+        },
+        {
+          "effective_gbps_from_mom": 422.874951705836,
+          "kind": "padding",
+          "per_run": [
+            {
+              "effective_gbps": 422.874952,
+              "median_ms": 0.317393422,
+              "p95_batch_mean_ms": 0.320662379,
+              "run_id": "2026-09-14-r01",
+              "source": "2026-09-14_f32_r01.json",
+              "speedup_vs_naive": 1.9313463843620555
+            },
+            {
+              "effective_gbps": 423.177018,
+              "median_ms": 0.317166865,
+              "p95_batch_mean_ms": 0.318565756,
+              "run_id": "2026-09-14-r02",
+              "source": "2026-09-14_f32_r02.json",
+              "speedup_vs_naive": 1.9374412834707684
+            },
+            {
+              "effective_gbps": 420.468519,
+              "median_ms": 0.319209933,
+              "p95_batch_mean_ms": 0.319528967,
+              "run_id": "2026-09-14-r03",
+              "source": "2026-09-14_f32_r03.json",
+              "speedup_vs_naive": 1.9201007068912233
+            },
+            {
+              "effective_gbps": 423.140916,
+              "median_ms": 0.317193925,
+              "p95_batch_mean_ms": 0.317664653,
+              "run_id": "2026-09-14-r04",
+              "source": "2026-09-14_f32_r04.json",
+              "speedup_vs_naive": 1.9335932931250182
+            },
+            {
+              "effective_gbps": 419.34363,
+              "median_ms": 0.320066214,
+              "p95_batch_mean_ms": 0.326942712,
+              "run_id": "2026-09-14-r05",
+              "source": "2026-09-14_f32_r05.json",
+              "speedup_vs_naive": 1.9159308861009616
+            }
+          ],
+          "run_median_ms": {
+            "count": 5,
+            "max": 0.320066214,
+            "median": 0.317393422,
+            "median_abs_deviation": 0.0002265569999999606,
+            "min": 0.317166865,
+            "range": 0.0028993489999999955
+          },
+          "run_p95_batch_mean_ms": {
+            "count": 5,
+            "max": 0.326942712,
+            "median": 0.319528967,
+            "median_abs_deviation": 0.0011334120000000003,
+            "min": 0.317664653,
+            "range": 0.009278059000000005
+          },
+          "speedup_vs_naive_from_mom": 1.9320650728545976
+        }
+      ],
+      "width": 4096
+    }
+  ],
+  "source_files": [
+    "2026-09-14_f32_r01.json",
+    "2026-09-14_f32_r02.json",
+    "2026-09-14_f32_r03.json",
+    "2026-09-14_f32_r04.json",
+    "2026-09-14_f32_r05.json"
+  ]
+}
