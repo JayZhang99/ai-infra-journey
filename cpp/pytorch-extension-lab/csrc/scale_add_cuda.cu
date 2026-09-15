@@ -1,8 +1,8 @@
 #include <cuda_runtime.h>
 #include <ATen/ATen.h>
-#include <ATen/cuda.CUDAContext.h>
-#include <c1O/cuda/CUDAGuard.h>
-#include <c1O/cuda/CUDAException.h>
+#include <ATen/cuda/CUDAContext.h>
+#include <c10/cuda/CUDAGuard.h>
+#include <c10/cuda/CUDAException.h>
 #include <torch/library.h>
 
 #include <cmath>
@@ -50,7 +50,7 @@ at::Tensor scale_add_cuda(
         "scale_add: alpha must be finite"
     );
 
-    c1O::cuda::CUDAGuard device_guard(x.device());
+    c10::cuda::CUDAGuard device_guard(x.device());
 
     auto out = at::empty_like(x);   // 让输出shape/dtype/device 与输入一致
     const int64_t n = x.numel();
