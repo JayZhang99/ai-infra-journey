@@ -17,7 +17,7 @@ if build_cuda:
     sources.append(str(source_cuda))
 
 load(
-    name = "jay_ops_cpu",
+    name = "jay_ops",
     sources=sources,
     extra_cflags = ["-O2"],
     extra_cuda_cflags = ["-O2"],

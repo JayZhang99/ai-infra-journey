@@ -76,7 +76,7 @@ at::Tensor scale_add_cuda(
             static_cast<float>(alpha)
         );
     
-    C1O_CUDA_KERNEL_LAUNCH_CHECK();
+    C10_CUDA_KERNEL_LAUNCH_CHECK();
     return out;
 }
 
