@@ -89,7 +89,7 @@ DEVICE_CASES = [
     "device",
     DEVICE_CASES,
 )
-def test_rdtype_non_contiguous(device):
+def test_dtype_non_contiguous(device):
     scale_add_op = torch.ops.jay_ops.scale_add
 
     with pytest.raises(RuntimeError, match="float32"):
@@ -136,7 +136,7 @@ def test_API_CUDA_CPU():
     not torch.cuda.is_available(),
     reason = "CUDA is unavailable",
 )
-def test_curret_stream():
+def test_current_stream():
     stream = torch.cuda.Stream()
     with torch.cuda.stream(stream):
         x = torch.arange(1024, device="cuda", dtype=torch.float32)

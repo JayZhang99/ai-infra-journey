@@ -30,7 +30,7 @@ at::Tensor scale_add_cuda(
 ) {
 
     TORCH_CHECK(
-        x.device().is_cuda(),
+        x.is_cuda(),
         "scale_add: x must be on CUDA"
     );
     TORCH_CHECK(
