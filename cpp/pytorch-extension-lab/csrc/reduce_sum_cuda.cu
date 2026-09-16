@@ -8,7 +8,7 @@
 #include <cmath>
 #include <cstdint>
 
-#include "cuda-kernel-lab/include/reduction.cuh"
+#include "reduction.cuh"
 
 namespace {
     at::Tensor reduce_sum_cuda(const at::Tensor& x) {
