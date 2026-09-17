@@ -15,6 +15,9 @@ if str(helper_directory) not in sys.path:
     )
 
 from extension_build import make_load_kwargs
+from runtime_registrations import (
+    register_runtime_kernels
+)
 
 
 
@@ -26,5 +29,5 @@ def load_jay_ops():
             verbose=False,
         )
     )
-
+    register_runtime_kernels()
     yield

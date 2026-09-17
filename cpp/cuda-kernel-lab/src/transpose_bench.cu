@@ -10,11 +10,17 @@
 #include <iomanip>
 #include <iostream>
 #include <limits>
-#include <optional>
 #include <stdexcept>
 #include <string>
 #include <utility>
 #include <vector>
+
+enum class BenchKind {
+    Copy,
+    Naive,
+    Tiled,
+    Padding,
+};
 
 struct BenchmarkResult {
     int height;
@@ -40,12 +46,19 @@ void cuda_check(
     }
 }
 
-const char* benchmark_kind_name(
-    const std::optional<TransposeKind>& kind
-) {
-    return kind.has_value()
-        ? transpose_kind_name(*kind)
-        : "copy";
+const char* bench_kind_name(BenchKind kind) {
+    switch (kind) {
+        case BenchKind::Copy:
+            return "copy";
+        case BenchKind::Naive:
+            return "naive";
+        case BenchKind::Tiled:
+            return "tiled";
+        case BenchKind::Padding:
+            return "padding";
+    }
+
+    return "unknown";
 }
 
 float median(std::vector<float> values) {
@@ -83,8 +96,30 @@ float percentile(
     ];
 }
 
+TransposeKind to_transpose_kind(
+    BenchKind kind
+) {
+    switch (kind) {
+        case BenchKind::Naive:
+            return TransposeKind::Naive;
+
+        case BenchKind::Tiled:
+            return TransposeKind::Tiled;
+
+        case BenchKind::Padding:
+            return TransposeKind::Padding;
+
+        case BenchKind::Copy:
+            break;
+    }
+
+    throw std::invalid_argument(
+        "copy has no TransposeKind"
+    );
+}
+
 void run_operation(
-    const std::optional<TransposeKind>& kind,
+    BenchKind kind,
     const float* input,
     float* output,
     int height,
@@ -92,7 +127,7 @@ void run_operation(
     std::size_t bytes,
     cudaStream_t stream
 ) {
-    if (!kind.has_value()) {
+    if (kind == BenchKind::Copy) {
         cuda_check(
             cudaMemcpyAsync(
                 output,
@@ -113,7 +148,7 @@ void run_operation(
         height,
         width,
         256,
-        *kind,
+        to_transpose_kind(kind),
         stream
     );
 }
@@ -122,9 +157,9 @@ std::vector<float> make_reference(
     const std::vector<float>& input,
     int height,
     int width,
-    const std::optional<TransposeKind>& kind
+    BenchKind kind
 ) {
-    if (!kind.has_value()) {
+    if (kind == BenchKind::Copy) {
         return input;
     }
 
@@ -143,7 +178,7 @@ std::vector<float> make_reference(
 BenchmarkResult run_benchmark(
     int height,
     int width,
-    const std::optional<TransposeKind>& kind,
+    BenchKind kind,
     int warmup_batches,
     int repeats,
     int launches_per_sample
@@ -352,7 +387,7 @@ BenchmarkResult run_benchmark(
                 "correctness failure"
                 " kind=" +
                 std::string(
-                    benchmark_kind_name(kind)
+                    bench_kind_name(kind)
                 ) +
                 " height=" +
                 std::to_string(height) +
@@ -390,7 +425,7 @@ BenchmarkResult run_benchmark(
     return {
         height,
         width,
-        benchmark_kind_name(kind),
+        bench_kind_name(kind),
         samples,
         median_ms,
         p95_ms,
@@ -438,11 +473,11 @@ int main(int argc, char** argv) {
             {4096, 4096},
         };
 
-        const std::optional<TransposeKind> kinds[] = {
-            std::nullopt,
-            TransposeKind::Naive,
-            TransposeKind::Tiled,
-            TransposeKind::Padding,
+        const BenchKind kinds[] = {
+            BenchKind::Copy,
+            BenchKind::Naive,
+            BenchKind::Tiled,
+            BenchKind::Padding,
         };
 
         std::vector<BenchmarkResult> results;
@@ -451,7 +486,7 @@ int main(int argc, char** argv) {
             const auto& [height, width] :
             shapes
         ) {
-            for (const auto& kind : kinds) {
+            for (BenchKind kind : kinds) {
                 results.push_back(
                     run_benchmark(
                         height,
@@ -497,7 +532,7 @@ int main(int argc, char** argv) {
             << "  \"git_revision\": "
             << std::quoted(git_revision)
             << ",\n"
-            << "  \"nvidia_driver_version\": "
+            << "  \"nvidia_driver_version\":_version\": "
             << std::quoted(driver_version)
             << ",\n"
             << "  \"storage_dtype\": \"float32\",\n"
