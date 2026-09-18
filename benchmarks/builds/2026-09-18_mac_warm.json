@@ -1,0 +1,15 @@
+{
+  "path": "/private/tmp/jay_ops_0918_cold.wMPkIA/jay_ops/jay_ops.so",
+  "size_bytes": 71847,
+  "mtime_ns": 1789773294797830701,
+  "mtime_utc": "2026-09-18T23:14:54.797831+00:00",
+  "sha256": "01dd332fa9db3492d627ec3c0e3640765189e0684c13420509030462761340ea",
+  "metadata": {
+    "probe_define": null,
+    "with_cuda": false,
+    "extra_cflags": [
+      "-O2"
+    ],
+    "extra_cuda_cflags": []
+  }
+}

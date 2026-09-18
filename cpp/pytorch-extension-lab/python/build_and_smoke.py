@@ -9,6 +9,35 @@ from runtime_registrations import (
 )
 from artifact_fingerprint import save_fingerprint
 
+def dump_dispatch_tables(
+    *,
+    stage: str,
+) -> None:
+    operators = (
+        "jay_ops::scale_add",
+        "jay_ops::reduce_sum",
+    )
+
+    print()
+    print(f"===== Dispatcher: {stage} =====")
+
+    for operator in operators:
+        dispatch_table = (
+            torch._C._dispatch_dump_table(
+                operator
+            )
+        )
+
+        if not dispatch_table.strip():
+            raise RuntimeError(
+                "Dispatcher table is empty for "
+                f"{operator} at stage={stage}"
+            )
+
+        print()
+        print(f"--- {operator} ---")
+        print(dispatch_table)
+
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser()
@@ -19,6 +48,15 @@ def build_parser() -> argparse.ArgumentParser:
         required=True,
         help="Path used to save the artifact fingerprint.",
     )
+
+    parser.add_argument(
+        "--dump-dispatch",
+        action="store_true",
+        help=(
+            "Print Dispatcher tables before and "
+            "after Python runtime registration."
+        ),
+)
 
     return parser
 
@@ -43,7 +81,17 @@ def main() -> None:
         )
     )
 
+    if args.dump_dispatch:
+        dump_dispatch_tables(
+            stage="after_library_load",
+        )
+
     register_runtime_kernels()
+
+    if args.dump_dispatch:
+        dump_dispatch_tables(
+            stage="after_runtime_registration",
+        )
 
     # Smoke test
     x = torch.tensor(
