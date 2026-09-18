@@ -1,0 +1,19 @@
+{
+  "path": "/tmp/jay_ops_0918_cold.hpWiAX/jay_ops/jay_ops.so",
+  "size_bytes": 197024,
+  "mtime_ns": 1789772805662436390,
+  "mtime_utc": "2026-09-18T23:06:45.662436+00:00",
+  "sha256": "b603b5c6a7f8f2094e54ec0f7ee9a56ab68fadcc1c242364c2dae5d30c8e0553",
+  "metadata": {
+    "probe_define": "JAY_PROBE_V1",
+    "with_cuda": true,
+    "extra_cflags": [
+      "-O2",
+      "-DJAY_PROBE_V1"
+    ],
+    "extra_cuda_cflags": [
+      "-O2",
+      "-DJAY_PROBE_V1"
+    ]
+  }
+}
