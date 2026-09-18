@@ -1,6 +1,7 @@
 from pathlib import Path
 import argparse
 import torch
+import os
 from torch.utils.cpp_extension import load
 from extension_build import make_load_kwargs
 from runtime_registrations import (
@@ -25,12 +26,20 @@ def build_parser() -> argparse.ArgumentParser:
 def main() -> None:
     args = build_parser().parse_args()
 
-    library_path = Path(
-        load(
-            **make_load_kwargs(
+    kwargs = make_load_kwargs(
                 name="jay_ops",
                 verbose=True,
             )
+
+    probe = os.environ.get("JAY_PROBE_DEFINE")
+    if probe:
+        kwargs["extra_cflags"].append(f"-D{probe}")
+        if kwargs["with_cuda"]:
+            kwargs["extra_cuda_cflags"].append(f"-D{probe}")
+
+    library_path = Path(
+        load(
+            **kwargs
         )
     )
 
