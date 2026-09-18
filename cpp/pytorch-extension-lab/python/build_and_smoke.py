@@ -1,4 +1,5 @@
 from pathlib import Path
+import argparse
 import torch
 from torch.utils.cpp_extension import load
 from extension_build import make_load_kwargs
@@ -8,25 +9,55 @@ from runtime_registrations import (
 from artifact_fingerprint import save_fingerprint
 
 
-library_path = Path(
-    load(
-        **make_load_kwargs(
-            name="jay_ops",
-            verbose=True,
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument(
+        "--fingerprint-output",
+        type=Path,
+        required=True,
+        help="Path used to save the artifact fingerprint.",
+    )
+
+    return parser
+
+
+def main() -> None:
+    args = build_parser().parse_args()
+
+    library_path = Path(
+        load(
+            **make_load_kwargs(
+                name="jay_ops",
+                verbose=True,
+            )
         )
     )
-)
+
+    register_runtime_kernels()
+
+    # Smoke test
+    x = torch.tensor(
+        [1.0, 2.0],
+        dtype=torch.float32,
+    )
+
+    actual = torch.ops.jay_ops.scale_add(
+        x,
+        2.0,
+    )
+    expected = x * 2.0 + 1.0
+
+    torch.testing.assert_close(
+        actual,
+        expected,
+    )
+
+    save_fingerprint(
+        artifact=library_path,
+        output=args.fingerprint_output,
+    )
 
 
-register_runtime_kernels()
-
-# 构建产物指纹
-record = save_fingerprint(
-    artifact=library_path,
-    output=Path(
-        "benchmarks/builds/"
-        "2026-09-18_mac_cold.json"
-    ),
-)
-
-print(record)
+if __name__ == "__main__":
+    main()
