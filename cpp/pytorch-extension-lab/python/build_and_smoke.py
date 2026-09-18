@@ -65,6 +65,15 @@ def main() -> None:
     save_fingerprint(
         artifact=library_path,
         output=args.fingerprint_output,
+        metadata={
+            "probe_define": probe,
+            "with_cuda": kwargs["with_cuda"],
+            "extra_cflags": kwargs["extra_cflags"],
+            "extra_cuda_cflags": kwargs.get(
+                "extra_cuda_cflags",
+                [],
+            ),
+        },
     )
 
 

@@ -59,8 +59,13 @@ def fingerprint_artifact(path: Path) -> dict:
 def save_fingerprint(
     artifact: Path,
     output: Path,
+    *,
+    metadata: dict | None = None,
 ) -> dict:
     result = fingerprint_artifact(artifact)
+
+    if metadata is not None:
+        result["metadata"] = metadata
 
     output = output.resolve()
     output.parent.mkdir(
