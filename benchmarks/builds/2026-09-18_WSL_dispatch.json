@@ -1,0 +1,17 @@
+{
+  "path": "/home/jay/ai-infra-journey/jay_ops/jay_ops.so",
+  "size_bytes": 197024,
+  "mtime_ns": 1789775019528656651,
+  "mtime_utc": "2026-09-18T23:43:39.528657+00:00",
+  "sha256": "7f3c371bc3c44e4d8ea148279d89a1636e6f202236d43de1cc214a5e91359b12",
+  "metadata": {
+    "probe_define": null,
+    "with_cuda": true,
+    "extra_cflags": [
+      "-O2"
+    ],
+    "extra_cuda_cflags": [
+      "-O2"
+    ]
+  }
+}
