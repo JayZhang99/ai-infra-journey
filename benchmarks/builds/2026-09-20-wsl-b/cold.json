@@ -1,0 +1,115 @@
+{
+  "artifact": {
+    "mtime_ns": 1789862327179727282,
+    "mtime_utc": "2026-09-19T23:58:47.179727+00:00",
+    "path": "/tmp/jay_ops_0920.6GaPfr/jay_ops/jay_ops.so",
+    "sha256": "44ac34b619d57b3820a7cf83aae88915445f8f43ffdaa79fd588752ac1071b19",
+    "size_bytes": 197024
+  },
+  "build": {
+    "extra_cflags": [
+      "-O2"
+    ],
+    "extra_cuda_cflags": [
+      "-O2"
+    ],
+    "include_paths": [
+      "cpp/cuda-kernel-lab/include"
+    ],
+    "name": "jay_ops",
+    "probe_define": null,
+    "sources": [
+      "cpp/pytorch-extension-lab/csrc/scale_add_cpu.cpp",
+      "cpp/pytorch-extension-lab/csrc/reduce_sum_cpu.cpp",
+      "cpp/pytorch-extension-lab/csrc/scale_add_cuda.cu",
+      "cpp/pytorch-extension-lab/csrc/reduce_sum_cuda.cu",
+      "cpp/cuda-kernel-lab/src/reduction.cu"
+    ],
+    "with_cuda": true
+  },
+  "cache_dir": "/tmp/jay_ops_0920.6GaPfr",
+  "created_at_utc": "2026-09-19T23:58:47.568403+00:00",
+  "environment": {
+    "compiler": {
+      "command": "c++",
+      "diagnostic": {
+        "available": true,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "c++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0\nCopyright (C) 2021 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
+      }
+    },
+    "cuda": {
+      "cuda_home": "/usr/local/cuda-13.0",
+      "devices": [
+        {
+          "compute_capability": [
+            8,
+            9
+          ],
+          "index": 0,
+          "name": "NVIDIA GeForce RTX 4070 Ti",
+          "total_memory_bytes": 12878086144
+        }
+      ],
+      "driver": {
+        "available": true,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "NVIDIA GeForce RTX 4070 Ti, 591.86, 8.9"
+      },
+      "nvcc": {
+        "available": true,
+        "path": "/usr/local/cuda-13.0/bin/nvcc",
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "nvcc: NVIDIA (R) Cuda compiler driver\nCopyright (c) 2005-2025 NVIDIA Corporation\nBuilt on Wed_Aug_20_01:58:59_PM_PDT_2025\nCuda compilation tools, release 13.0, V13.0.88\nBuild cuda_13.0.r13.0/compiler.36424714_0"
+      },
+      "torch_cuda_available": true,
+      "torch_cuda_version": "13.0"
+    },
+    "platform": {
+      "machine": "x86_64",
+      "release": "6.18.33.2-microsoft-standard-WSL2",
+      "system": "Linux"
+    },
+    "python": {
+      "executable": "/usr/bin/python3.10",
+      "version": "3.10.12"
+    },
+    "pytorch": {
+      "cxx11_abi": true,
+      "version": "2.13.0+cu130"
+    }
+  },
+  "git": {
+    "dirty": true,
+    "dirty_entry_count": 4,
+    "revision": "c73125e",
+    "status_sha256": "f1f2019c1214ab7a4bafc32d8c6d456ea62910982899e8c815e8339f6979a452"
+  },
+  "phase": "cold",
+  "repo_root": "/home/jay/ai-infra-journey",
+  "run_id": "2026-09-20-wsl-b",
+  "schema_version": 1,
+  "smoke": {
+    "alpha": 2.0,
+    "input": {
+      "device": "cpu",
+      "dtype": "torch.float32",
+      "shape": [
+        2
+      ]
+    },
+    "max_abs_error": 0.0,
+    "operator": "jay_ops::scale_add",
+    "output": {
+      "device": "cpu",
+      "dtype": "torch.float32",
+      "shape": [
+        2
+      ]
+    },
+    "passed": true
+  }
+}
