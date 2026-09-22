@@ -1,0 +1,42 @@
+{
+  "graph_name": "main_graph",
+  "opsets": {
+    "ai.onnx": 18
+  },
+  "node_count": 14,
+  "operator_counts": {
+    "Add": 2,
+    "MatMul": 3,
+    "Mul": 4,
+    "Pow": 1,
+    "Reciprocal": 1,
+    "ReduceMean": 1,
+    "Sigmoid": 1,
+    "Sqrt": 1
+  },
+  "inputs": [
+    {
+      "name": "input",
+      "dtype": "FLOAT",
+      "shape": [
+        "batch",
+        "sequence",
+        8
+      ]
+    }
+  ],
+  "outputs": [
+    {
+      "name": "output",
+      "dtype": "FLOAT",
+      "shape": [
+        "batch",
+        "sequence",
+        8
+      ]
+    }
+  ],
+  "initializer_count": 7,
+  "initializer_bytes": 1584,
+  "model_sha256": "7cde8f112b7e6401435aa9fcfa5635e7a8d678ea7485a1936e057d364604f690"
+}

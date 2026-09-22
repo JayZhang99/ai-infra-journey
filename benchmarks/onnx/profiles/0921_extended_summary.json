@@ -1,0 +1,117 @@
+{
+  "artifacts": {
+    "model": {
+      "original_node_count": 14,
+      "path": "artifacts/onnx/tiny_ffn/tiny_ffn.onnx",
+      "sha256": "7cde8f112b7e6401435aa9fcfa5635e7a8d678ea7485a1936e057d364604f690",
+      "size": 19430
+    },
+    "optimized_model": {
+      "path": "artifacts/onnx/tiny_ffn/optimized_extended.onnx",
+      "sha256": "2b82253211fee51b18b15cdafcd13cee252944a8319ae8ea758594d963ac2fb4",
+      "size": 3390
+    },
+    "trace": {
+      "path": "benchmarks/onnx/profiles/0921_extended_trace.json",
+      "sha256": "f535ddb1d680b60da45be9f5ddfbc40e887113afdab841514842eba03c44cc1c",
+      "size": 27464
+    }
+  },
+  "configuration": {
+    "dtype": "float32",
+    "optimization_level": "extended",
+    "seed": 0,
+    "shape": [
+      1,
+      128,
+      8
+    ],
+    "steps": 5,
+    "threads": 1
+  },
+  "created_at_utc": "2026-09-22T23:54:49.893512+00:00",
+  "environment": {
+    "available_providers": [
+      "CoreMLExecutionProvider",
+      "AzureExecutionProvider",
+      "CPUExecutionProvider"
+    ],
+    "onnxruntime": "1.23.2",
+    "selected_providers": [
+      "CPUExecutionProvider"
+    ]
+  },
+  "event_count": 77,
+  "experiment": "tiny_ffn_ort_cpu_profile",
+  "node_event_count": 65,
+  "op_counts": {
+    "Add": 10,
+    "MatMul": 15,
+    "Mul": 15,
+    "Pow": 5,
+    "QuickGelu": 5,
+    "Reciprocal": 5,
+    "ReduceMean": 5,
+    "Sqrt": 5
+  },
+  "op_total_dur_us": {
+    "Add": 21.0,
+    "MatMul": 27.0,
+    "Mul": 56.0,
+    "Pow": 24.0,
+    "QuickGelu": 13.0,
+    "Reciprocal": 2.0,
+    "ReduceMean": 17.0,
+    "Sqrt": 4.0
+  },
+  "provider_counts": {
+    "CPUExecutionProvider": 65
+  },
+  "schema_version": 1,
+  "session": {
+    "creation_ms": 3.416542,
+    "input_name": "input",
+    "input_shape": [
+      "batch",
+      "sequence",
+      8
+    ],
+    "input_type": "tensor(float)",
+    "output_name": "output",
+    "output_shape": [
+      "batch",
+      "sequence",
+      8
+    ],
+    "output_type": "tensor(float)"
+  },
+  "session_event_count": 12,
+  "session_event_counts": {
+    "SequentialExecutor::Execute": 5,
+    "model_loading_uri": 1,
+    "model_run": 5,
+    "session_initialization": 1
+  },
+  "top_ops_by_profile_dur_us": [
+    {
+      "dur_us": 56.0,
+      "op_name": "Mul"
+    },
+    {
+      "dur_us": 27.0,
+      "op_name": "MatMul"
+    },
+    {
+      "dur_us": 24.0,
+      "op_name": "Pow"
+    },
+    {
+      "dur_us": 21.0,
+      "op_name": "Add"
+    },
+    {
+      "dur_us": 17.0,
+      "op_name": "ReduceMean"
+    }
+  ]
+}

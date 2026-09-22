@@ -49,7 +49,7 @@ class TinyFFNBlock(nn.Module):
         self.norm = RMSNorm(d_model)
         self.ffn = SwiGLU(d_model, d_ff)
     
-    def forward(self, x = torch.Tensor) -> torch.Tensor:
+    def forward(self, x : torch.Tensor) -> torch.Tensor:
         return x + self.ffn(self.norm(x))
 
 class MultiHeadAttention(nn.Module):
