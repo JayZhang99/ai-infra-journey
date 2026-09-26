@@ -1,6 +1,25 @@
+# Python virtual environments
+.venv/
+.venv-*/
+venv/
+
+# Python caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+
+# Native build outputs
+cpp/build*/
+CMakeFiles/
+*.so
+*.o
+*.a
+.ninja_*
 # C++ / CUDA build outputs
 cpp/build/
 cpp/build-*/
+
 
 .pytest_cache/
 .venv/
