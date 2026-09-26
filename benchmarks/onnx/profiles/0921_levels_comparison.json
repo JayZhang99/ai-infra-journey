@@ -1,0 +1,158 @@
+{
+  "schema_version": 1,
+  "experiment": "ort_optimization_level_comparison",
+  "comparison_contract": {
+    "model_sha256": "7cde8f112b7e6401435aa9fcfa5635e7a8d678ea7485a1936e057d364604f690",
+    "shape": [
+      1,
+      128,
+      8
+    ],
+    "dtype": "float32",
+    "steps": 5,
+    "threads": 1,
+    "selected_providers": [
+      "CPUExecutionProvider"
+    ]
+  },
+  "levels": {
+    "disable": {
+      "level": "disable",
+      "nodes_per_run": 14,
+      "ops_per_run": {
+        "Add": 2,
+        "MatMul": 3,
+        "Mul": 4,
+        "Pow": 1,
+        "Reciprocal": 1,
+        "ReduceMean": 1,
+        "Sigmoid": 1,
+        "Sqrt": 1
+      },
+      "profile_op_dur_us_per_run": {
+        "Add": 3.6,
+        "MatMul": 4.8,
+        "Mul": 7.2,
+        "Pow": 4.0,
+        "Reciprocal": 0.2,
+        "ReduceMean": 3.4,
+        "Sigmoid": 1.6,
+        "Sqrt": 0.6
+      },
+      "selected_providers": [
+        "CPUExecutionProvider"
+      ],
+      "session_creation_ms": 3.138875,
+      "optimized_model_size": 19596,
+      "optimized_model_sha256": "8fea6376f44795772f4ab135024afeba0a5b50d0287e0bdefec7e3129f0638c8"
+    },
+    "basic": {
+      "level": "basic",
+      "nodes_per_run": 14,
+      "ops_per_run": {
+        "Add": 2,
+        "MatMul": 3,
+        "Mul": 4,
+        "Pow": 1,
+        "Reciprocal": 1,
+        "ReduceMean": 1,
+        "Sigmoid": 1,
+        "Sqrt": 1
+      },
+      "profile_op_dur_us_per_run": {
+        "Add": 3.8,
+        "MatMul": 4.8,
+        "Mul": 7.0,
+        "Pow": 5.0,
+        "Reciprocal": 0.4,
+        "ReduceMean": 3.2,
+        "Sigmoid": 2.4,
+        "Sqrt": 0.8
+      },
+      "selected_providers": [
+        "CPUExecutionProvider"
+      ],
+      "session_creation_ms": 2.853666,
+      "optimized_model_size": 19596,
+      "optimized_model_sha256": "8fea6376f44795772f4ab135024afeba0a5b50d0287e0bdefec7e3129f0638c8"
+    },
+    "extended": {
+      "level": "extended",
+      "nodes_per_run": 13,
+      "ops_per_run": {
+        "Add": 2,
+        "MatMul": 3,
+        "Mul": 3,
+        "Pow": 1,
+        "QuickGelu": 1,
+        "Reciprocal": 1,
+        "ReduceMean": 1,
+        "Sqrt": 1
+      },
+      "profile_op_dur_us_per_run": {
+        "Add": 4.2,
+        "MatMul": 5.4,
+        "Mul": 11.2,
+        "Pow": 4.8,
+        "QuickGelu": 2.6,
+        "Reciprocal": 0.4,
+        "ReduceMean": 3.4,
+        "Sqrt": 0.8
+      },
+      "selected_providers": [
+        "CPUExecutionProvider"
+      ],
+      "session_creation_ms": 3.416542,
+      "optimized_model_size": 3390,
+      "optimized_model_sha256": "2b82253211fee51b18b15cdafcd13cee252944a8319ae8ea758594d963ac2fb4"
+    },
+    "all": {
+      "level": "all",
+      "nodes_per_run": 13,
+      "ops_per_run": {
+        "Add": 2,
+        "MatMul": 3,
+        "Mul": 3,
+        "Pow": 1,
+        "QuickGelu": 1,
+        "Reciprocal": 1,
+        "ReduceMean": 1,
+        "Sqrt": 1
+      },
+      "profile_op_dur_us_per_run": {
+        "Add": 3.6,
+        "MatMul": 4.4,
+        "Mul": 6.6,
+        "Pow": 4.0,
+        "QuickGelu": 2.6,
+        "Reciprocal": 0.2,
+        "ReduceMean": 2.8,
+        "Sqrt": 0.4
+      },
+      "selected_providers": [
+        "CPUExecutionProvider"
+      ],
+      "session_creation_ms": 4.163584,
+      "optimized_model_size": 3390,
+      "optimized_model_sha256": "2b82253211fee51b18b15cdafcd13cee252944a8319ae8ea758594d963ac2fb4"
+    }
+  },
+  "fusion_boundary": {
+    "quickgelu": {
+      "observed": true,
+      "observed_from": "extended",
+      "evidence": {
+        "basic": {
+          "Sigmoid": 1,
+          "QuickGelu": 0,
+          "Mul": 4
+        },
+        "extended": {
+          "Sigmoid": 0,
+          "QuickGelu": 1,
+          "Mul": 3
+        }
+      }
+    }
+  }
+}

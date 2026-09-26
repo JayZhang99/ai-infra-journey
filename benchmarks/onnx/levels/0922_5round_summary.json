@@ -1,0 +1,390 @@
+{
+  "best_level_by_median_of_medians": "all",
+  "comparison_contract": {
+    "atol": 1e-05,
+    "dtype": "float32",
+    "execution_mode": "sequential",
+    "level_order_policy": "rotating_start",
+    "model_sha256": "7cde8f112b7e6401435aa9fcfa5635e7a8d678ea7485a1936e057d364604f690",
+    "model_size": 19430,
+    "onnxruntime": "1.23.2",
+    "repeats": 100,
+    "rtol": 0.0001,
+    "runs_per_sample": 100,
+    "sample_unit": "mean_ms_per_ort_run_within_batched_sample",
+    "seed": 0,
+    "selected_providers": [
+      "CPUExecutionProvider"
+    ],
+    "shape": [
+      1,
+      128,
+      8
+    ],
+    "threads": 1,
+    "warmup": 20
+  },
+  "created_at_utc": "2026-09-25T14:08:33.918065+00:00",
+  "experiment": "ort_optimization_levels_cpu_5round_aggregate",
+  "interpretation": {
+    "next_test": "Repeat on a larger workload and compare the observed delta with cross-round drift.",
+    "statement": "The best level is descriptive for these runs only; it is not proof that the optimization level caused the latency difference."
+  },
+  "levels": {
+    "all": {
+      "delta_vs_disable_ms": -0.00019645499999999816,
+      "delta_vs_disable_percent": -1.338496411803529,
+      "median_max_ms": 0.01511021,
+      "median_min_ms": 0.014399374999999999,
+      "median_of_means_ms": 0.014637770699999999,
+      "median_of_medians_ms": 0.014480835000000001,
+      "median_of_p95_ms": 0.0159578155,
+      "median_range_ms": 0.0007108350000000017,
+      "p95_max_ms": 0.020605795,
+      "p95_min_ms": 0.015595663499999999,
+      "p95_range_ms": 0.005010131500000001,
+      "round_medians_ms": [
+        0.01511021,
+        0.014405834999999999,
+        0.014480835000000001,
+        0.014399374999999999,
+        0.01454188
+      ],
+      "round_p95_ms": [
+        0.020605795,
+        0.015960816,
+        0.0159578155,
+        0.015595663499999999,
+        0.015795271
+      ],
+      "winner_count": 3
+    },
+    "basic": {
+      "delta_vs_disable_ms": 5.9795000000001375e-05,
+      "delta_vs_disable_percent": 0.407398095970042,
+      "median_max_ms": 0.01493937,
+      "median_min_ms": 0.014533535,
+      "median_of_means_ms": 0.0148457664,
+      "median_of_medians_ms": 0.014737085,
+      "median_of_p95_ms": 0.0159896425,
+      "median_range_ms": 0.0004058350000000002,
+      "p95_max_ms": 0.019424274000000002,
+      "p95_min_ms": 0.0158068575,
+      "p95_range_ms": 0.0036174165000000015,
+      "round_medians_ms": [
+        0.014780415,
+        0.014533535,
+        0.014720205,
+        0.014737085,
+        0.01493937
+      ],
+      "round_p95_ms": [
+        0.019424274000000002,
+        0.0158068575,
+        0.0159896425,
+        0.015935434000000002,
+        0.0162038155
+      ],
+      "winner_count": 0
+    },
+    "disable": {
+      "delta_vs_disable_ms": 0.0,
+      "delta_vs_disable_percent": 0.0,
+      "median_max_ms": 0.014773544999999999,
+      "median_min_ms": 0.014476039999999999,
+      "median_of_means_ms": 0.014871474199999998,
+      "median_of_medians_ms": 0.014677289999999999,
+      "median_of_p95_ms": 0.0160001875,
+      "median_range_ms": 0.000297505,
+      "p95_max_ms": 0.021015454999999992,
+      "p95_min_ms": 0.0158199585,
+      "p95_range_ms": 0.005195496499999994,
+      "round_medians_ms": [
+        0.01473792,
+        0.014476039999999999,
+        0.014677289999999999,
+        0.01453146,
+        0.014773544999999999
+      ],
+      "round_p95_ms": [
+        0.021015454999999992,
+        0.015917604,
+        0.0163986455,
+        0.0160001875,
+        0.0158199585
+      ],
+      "winner_count": 1
+    },
+    "extended": {
+      "delta_vs_disable_ms": -9.833000000000064e-05,
+      "delta_vs_disable_percent": -0.6699465637048845,
+      "median_max_ms": 0.01496542,
+      "median_min_ms": 0.01428083,
+      "median_of_means_ms": 0.014784771,
+      "median_of_medians_ms": 0.014578959999999998,
+      "median_of_p95_ms": 0.0160140595,
+      "median_range_ms": 0.0006845900000000005,
+      "p95_max_ms": 0.02833799999999999,
+      "p95_min_ms": 0.015498318499999999,
+      "p95_range_ms": 0.012839681499999993,
+      "round_medians_ms": [
+        0.01496542,
+        0.01428083,
+        0.014578959999999998,
+        0.014555624999999999,
+        0.014811250000000001
+      ],
+      "round_p95_ms": [
+        0.02833799999999999,
+        0.015498318499999999,
+        0.015898648999999997,
+        0.016109128,
+        0.0160140595
+      ],
+      "winner_count": 1
+    }
+  },
+  "round_count": 5,
+  "round_results": [
+    {
+      "levels": {
+        "all": {
+          "count": 100,
+          "max_ms": 0.06740709,
+          "mean_ms": 0.0166040207,
+          "median_ms": 0.01511021,
+          "min_ms": 0.01386625,
+          "p95_ms": 0.020605795
+        },
+        "basic": {
+          "count": 100,
+          "max_ms": 0.03667958,
+          "mean_ms": 0.015767687399999997,
+          "median_ms": 0.014780415,
+          "min_ms": 0.014268749999999998,
+          "p95_ms": 0.019424274000000002
+        },
+        "disable": {
+          "count": 100,
+          "max_ms": 0.15515292,
+          "mean_ms": 0.0171936462,
+          "median_ms": 0.01473792,
+          "min_ms": 0.014204159999999999,
+          "p95_ms": 0.021015454999999992
+        },
+        "extended": {
+          "count": 100,
+          "max_ms": 0.09811042,
+          "mean_ms": 0.0176082878,
+          "median_ms": 0.01496542,
+          "min_ms": 0.0141075,
+          "p95_ms": 0.02833799999999999
+        }
+      },
+      "run_id": "0922-r01",
+      "winner_levels": [
+        "disable"
+      ]
+    },
+    {
+      "levels": {
+        "all": {
+          "count": 100,
+          "max_ms": 0.01738333,
+          "mean_ms": 0.014632874899999999,
+          "median_ms": 0.014405834999999999,
+          "min_ms": 0.01397416,
+          "p95_ms": 0.015960816
+        },
+        "basic": {
+          "count": 100,
+          "max_ms": 0.01703625,
+          "mean_ms": 0.0147168129,
+          "median_ms": 0.014533535,
+          "min_ms": 0.013977090000000001,
+          "p95_ms": 0.0158068575
+        },
+        "disable": {
+          "count": 100,
+          "max_ms": 0.01724,
+          "mean_ms": 0.0147074423,
+          "median_ms": 0.014476039999999999,
+          "min_ms": 0.01398167,
+          "p95_ms": 0.015917604
+        },
+        "extended": {
+          "count": 100,
+          "max_ms": 0.01605875,
+          "mean_ms": 0.0144986872,
+          "median_ms": 0.01428083,
+          "min_ms": 0.01381875,
+          "p95_ms": 0.015498318499999999
+        }
+      },
+      "run_id": "0922-r02",
+      "winner_levels": [
+        "extended"
+      ]
+    },
+    {
+      "levels": {
+        "all": {
+          "count": 100,
+          "max_ms": 0.016237500000000002,
+          "mean_ms": 0.0146874287,
+          "median_ms": 0.014480835000000001,
+          "min_ms": 0.01391958,
+          "p95_ms": 0.0159578155
+        },
+        "basic": {
+          "count": 100,
+          "max_ms": 0.01734291,
+          "mean_ms": 0.0148364077,
+          "median_ms": 0.014720205,
+          "min_ms": 0.01407542,
+          "p95_ms": 0.0159896425
+        },
+        "disable": {
+          "count": 100,
+          "max_ms": 0.017795000000000002,
+          "mean_ms": 0.0149674789,
+          "median_ms": 0.014677289999999999,
+          "min_ms": 0.014158329999999998,
+          "p95_ms": 0.0163986455
+        },
+        "extended": {
+          "count": 100,
+          "max_ms": 0.01623083,
+          "mean_ms": 0.014719933000000001,
+          "median_ms": 0.014578959999999998,
+          "min_ms": 0.013836250000000001,
+          "p95_ms": 0.015898648999999997
+        }
+      },
+      "run_id": "0922-r03",
+      "winner_levels": [
+        "all"
+      ]
+    },
+    {
+      "levels": {
+        "all": {
+          "count": 100,
+          "max_ms": 0.01593375,
+          "mean_ms": 0.0145069581,
+          "median_ms": 0.014399374999999999,
+          "min_ms": 0.013782909999999999,
+          "p95_ms": 0.015595663499999999
+        },
+        "basic": {
+          "count": 100,
+          "max_ms": 0.01659375,
+          "mean_ms": 0.0148457664,
+          "median_ms": 0.014737085,
+          "min_ms": 0.014045829999999999,
+          "p95_ms": 0.015935434000000002
+        },
+        "disable": {
+          "count": 100,
+          "max_ms": 0.01797125,
+          "mean_ms": 0.0147316669,
+          "median_ms": 0.01453146,
+          "min_ms": 0.013942920000000001,
+          "p95_ms": 0.0160001875
+        },
+        "extended": {
+          "count": 100,
+          "max_ms": 0.017353749999999998,
+          "mean_ms": 0.014784771,
+          "median_ms": 0.014555624999999999,
+          "min_ms": 0.013925419999999999,
+          "p95_ms": 0.016109128
+        }
+      },
+      "run_id": "0922-r04",
+      "winner_levels": [
+        "all"
+      ]
+    },
+    {
+      "levels": {
+        "all": {
+          "count": 100,
+          "max_ms": 0.017003749999999998,
+          "mean_ms": 0.014637770699999999,
+          "median_ms": 0.01454188,
+          "min_ms": 0.01372625,
+          "p95_ms": 0.015795271
+        },
+        "basic": {
+          "count": 100,
+          "max_ms": 0.01691333,
+          "mean_ms": 0.0150396164,
+          "median_ms": 0.01493937,
+          "min_ms": 0.014124159999999998,
+          "p95_ms": 0.0162038155
+        },
+        "disable": {
+          "count": 100,
+          "max_ms": 0.01657833,
+          "mean_ms": 0.014871474199999998,
+          "median_ms": 0.014773544999999999,
+          "min_ms": 0.01407333,
+          "p95_ms": 0.0158199585
+        },
+        "extended": {
+          "count": 100,
+          "max_ms": 0.01652667,
+          "mean_ms": 0.0148192708,
+          "median_ms": 0.014811250000000001,
+          "min_ms": 0.013868750000000001,
+          "p95_ms": 0.0160140595
+        }
+      },
+      "run_id": "0922-r05",
+      "winner_levels": [
+        "all"
+      ]
+    }
+  ],
+  "run_ids": [
+    "0922-r01",
+    "0922-r02",
+    "0922-r03",
+    "0922-r04",
+    "0922-r05"
+  ],
+  "schema_version": 1,
+  "source_files": [
+    {
+      "path": "benchmarks/onnx/levels/runs/0922_round01.json",
+      "run_id": "0922-r01",
+      "sha256": "d5f3e57956ff3d679079912724fb8f97681132aaea9e116eaea4eec5d1ab755d",
+      "size": 19278
+    },
+    {
+      "path": "benchmarks/onnx/levels/runs/0922_round02.json",
+      "run_id": "0922-r02",
+      "sha256": "8d9689b9d582056b2713ce808af9c8c2796af6c18bb723d2445ba19a15f5da5d",
+      "size": 19593
+    },
+    {
+      "path": "benchmarks/onnx/levels/runs/0922_round03.json",
+      "run_id": "0922-r03",
+      "sha256": "d159544942a292f79a7b3192081567059a47ba80bcab3512fa9e81204887d771",
+      "size": 19623
+    },
+    {
+      "path": "benchmarks/onnx/levels/runs/0922_round04.json",
+      "run_id": "0922-r04",
+      "sha256": "6af2b172538bb0f4d849a66fac5be8d48d92dda2c7a4e413670a15e1c82488a5",
+      "size": 19468
+    },
+    {
+      "path": "benchmarks/onnx/levels/runs/0922_round05.json",
+      "run_id": "0922-r05",
+      "sha256": "9094d3a1c5325e57ad01e64d3247cabb34fcc6bc1965edd234ec5a2aa3dc45cc",
+      "size": 19709
+    }
+  ]
+}

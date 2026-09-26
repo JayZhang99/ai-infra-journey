@@ -1,0 +1,155 @@
+{
+  "configuration": {
+    "atol": 1e-05,
+    "dtype": "float32",
+    "execution_mode": "sequential",
+    "level_order_policy": "rotating_start",
+    "repeats": 3,
+    "rtol": 0.0001,
+    "runs_per_sample": 2,
+    "seed": 0,
+    "shape": [
+      1,
+      128,
+      8
+    ],
+    "threads": 1,
+    "warmup": 1
+  },
+  "created_at_utc": "2026-09-24T00:15:57.725859+00:00",
+  "environment": {
+    "available_providers": [
+      "CoreMLExecutionProvider",
+      "AzureExecutionProvider",
+      "CPUExecutionProvider"
+    ],
+    "onnxruntime": "1.23.2",
+    "selected_providers": [
+      "CPUExecutionProvider"
+    ]
+  },
+  "experiment": "ort_optimization_levels_cpu",
+  "levels": {
+    "all": {
+      "parity": {
+        "max_abs_error": 0.0,
+        "mean_abs_error": 0.0
+      },
+      "samples_ms_per_run": [
+        0.0328955,
+        0.019458,
+        0.0160625
+      ],
+      "selected_providers": [
+        "CPUExecutionProvider"
+      ],
+      "session_creation_ms": 0.835667,
+      "summary_ms_per_run": {
+        "count": 3,
+        "max_ms": 0.0328955,
+        "mean_ms": 0.022805333333333334,
+        "median_ms": 0.019458,
+        "min_ms": 0.0160625,
+        "p95_ms": 0.03155175
+      }
+    },
+    "basic": {
+      "parity": {
+        "max_abs_error": 0.0,
+        "mean_abs_error": 0.0
+      },
+      "samples_ms_per_run": [
+        0.0215415,
+        0.018375,
+        0.01725
+      ],
+      "selected_providers": [
+        "CPUExecutionProvider"
+      ],
+      "session_creation_ms": 1.886375,
+      "summary_ms_per_run": {
+        "count": 3,
+        "max_ms": 0.0215415,
+        "mean_ms": 0.0190555,
+        "median_ms": 0.018375,
+        "min_ms": 0.01725,
+        "p95_ms": 0.02122485
+      }
+    },
+    "disable": {
+      "parity": {
+        "max_abs_error": 0.0,
+        "mean_abs_error": 0.0
+      },
+      "samples_ms_per_run": [
+        0.062167,
+        0.018,
+        0.0159165
+      ],
+      "selected_providers": [
+        "CPUExecutionProvider"
+      ],
+      "session_creation_ms": 27.949041,
+      "summary_ms_per_run": {
+        "count": 3,
+        "max_ms": 0.062167,
+        "mean_ms": 0.03202783333333333,
+        "median_ms": 0.018,
+        "min_ms": 0.0159165,
+        "p95_ms": 0.05775029999999999
+      }
+    },
+    "extended": {
+      "parity": {
+        "max_abs_error": 0.0,
+        "mean_abs_error": 0.0
+      },
+      "samples_ms_per_run": [
+        0.025396,
+        0.0464585,
+        0.0171875
+      ],
+      "selected_providers": [
+        "CPUExecutionProvider"
+      ],
+      "session_creation_ms": 1.782083,
+      "summary_ms_per_run": {
+        "count": 3,
+        "max_ms": 0.0464585,
+        "mean_ms": 0.029680666666666664,
+        "median_ms": 0.025396,
+        "min_ms": 0.0171875,
+        "p95_ms": 0.044352249999999996
+      }
+    }
+  },
+  "model": {
+    "path": "artifacts/onnx/tiny_ffn/tiny_ffn.onnx",
+    "sha256": "7cde8f112b7e6401435aa9fcfa5635e7a8d678ea7485a1936e057d364604f690",
+    "size": 19430
+  },
+  "profile_enabled": false,
+  "run_id": "0922-smoke",
+  "sample_orders": [
+    [
+      "disable",
+      "basic",
+      "extended",
+      "all"
+    ],
+    [
+      "basic",
+      "extended",
+      "all",
+      "disable"
+    ],
+    [
+      "extended",
+      "all",
+      "disable",
+      "basic"
+    ]
+  ],
+  "sample_unit": "mean_ms_per_ort_run_within_batched_sample",
+  "schema_version": 1
+}
