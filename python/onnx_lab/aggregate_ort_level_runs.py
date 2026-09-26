@@ -10,6 +10,10 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Sequence
 
+from python.experiment_identity import (
+    collect_source_identity,
+    require_same_source_identity,
+)
 
 LEVEL_ORDER = (
     "disable",
@@ -121,8 +125,19 @@ def contract_signature(data: dict[str, Any]) -> dict[str, Any]:
 
 
 def validate_run(data: dict[str, Any]) -> None:
-    if data.get("schema_version") != 1:
-        raise ValueError("unsupported schema_version")
+    schema_version = data.get("schema_version")
+
+    if schema_version not in {1, 2}:
+        raise ValueError(
+            "unsupported schema_version"
+        )
+
+    if schema_version == 2:
+        identity = data.get("source_identity")
+        if not isinstance(identity, dict):
+            raise ValueError(
+                "schema v2 requires source_identity object"
+            )
     if data.get("experiment") != "ort_optimization_levels_cpu":
         raise ValueError("unexpected experiment")
     if data.get("profile_enabled") is not False:
@@ -347,6 +362,19 @@ def aggregate_files(
     *,
     expected_rounds: int = 5,
 ) -> dict[str, Any]:
+    module_path = Path(__file__).resolve()
+
+    aggregator_identity = collect_source_identity(
+        start=module_path,
+        source_files=[
+            module_path,
+            module_path.parents[1]
+            / "experiment_identity.py",
+        ],
+        require_clean=False,
+        capture_point="before_aggregation",
+    )
+
     normalized = [Path(path) for path in paths]
     resolved = [path.resolve() for path in normalized]
     if len(set(resolved)) != len(resolved):
@@ -368,11 +396,48 @@ def aggregate_files(
             "run_id": data.get("run_id"),
         })
 
-    return aggregate_runs(
+    identities = [
+        run.get("source_identity")
+        for run in runs
+    ]
+
+    if all(identity is None for identity in identities):
+        producer_identity = None
+        producer_identity_status = "legacy_missing"
+
+    elif any(identity is None for identity in identities):
+        raise ValueError(
+            "cannot mix runs with and without "
+            "source_identity"
+        )
+
+    else:
+        producer_identity = (
+            require_same_source_identity(runs)
+        )
+        producer_identity_status = "verified"
+
+    result = aggregate_runs(
         runs,
         sources=sources,
         expected_rounds=expected_rounds,
     )
+
+    result["producer_source_identity"] = (
+        producer_identity
+    )
+
+    result["aggregator_source_identity"] = (
+        aggregator_identity
+    )
+
+    result["producer_identity_status"] = (
+        producer_identity_status
+    )
+
+    result["schema_version"] = 2
+
+    return result
 
 
 def build_parser() -> argparse.ArgumentParser:

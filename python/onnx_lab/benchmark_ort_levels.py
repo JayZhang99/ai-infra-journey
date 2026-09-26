@@ -16,6 +16,11 @@ from python.benchmark_utils import (
     summarize,
 )
 
+from python.experiment_identity import (
+    collect_source_identity,
+    require_same_fingerprint,
+)
+
 
 LEVEL_ORDER = (
     "disable",
@@ -136,6 +141,7 @@ def benchmark_ort_levels(
     runs_per_sample: int,
     seed: int,
     run_id: str | None = None,
+    require_clean_source: bool = False,
 ) -> dict[str, Any]:
     model_path = Path(model_path)
 
@@ -159,6 +165,20 @@ def benchmark_ort_levels(
     if runs_per_sample <= 0:
         raise ValueError(
             "runs_per_sample must be positive"
+        )
+
+    module_path = Path(__file__).resolve()
+    python_dir = module_path.parents[1]
+    source_files=[
+            module_path,
+            python_dir / "benchmark_utils.py",
+            python_dir / "experiment_identity.py",
+        ]
+    source_before = collect_source_identity(
+        start=module_path,
+        source_files=source_files,
+        require_clean=require_clean_source,
+        capture_point="before_measurement"
         )
 
     rng = np.random.default_rng(seed)
@@ -309,15 +329,25 @@ def benchmark_ort_levels(
                 summarize(samples[level]),
         }
 
+    source_after = collect_source_identity(
+    start=module_path, source_files=source_files,
+    require_clean=False,
+    capture_point="after_measurement",
+    )
+    source_identity = (
+    require_same_fingerprint([
+        source_before,
+        source_after,
+    ])
+)
+
     return {
-        "schema_version": 1,
+        "schema_version": 2,
         "experiment":
             "ort_optimization_levels_cpu",
 
         "created_at_utc":
-            datetime.now(
-                timezone.utc
-            ).isoformat(),
+            datetime.now(timezone.utc).isoformat(),
 
         "run_id": run_id,
         "profile_enabled": False,
@@ -327,6 +357,7 @@ def benchmark_ort_levels(
             "within_batched_sample"
         ),
 
+        "source_identity": source_identity,
         "model": {
             "path": str(model_path),
             "size": model_path.stat().st_size,
@@ -448,6 +479,14 @@ def build_parser() -> argparse.ArgumentParser:
         required=True,
         type=Path,
     )
+    parser.add_argument(
+    "--require-clean-source",
+    action="store_true",
+    help=(
+        "Reject formal benchmark runs "
+        "when the Git worktree is dirty"
+    ),
+)
 
     return parser
 
@@ -466,6 +505,9 @@ def main(
         runs_per_sample=args.runs_per_sample,
         seed=args.seed,
         run_id=args.run_id,
+        require_clean_source=(
+            args.require_clean_source
+        ),
     )
 
     output = save_result(
