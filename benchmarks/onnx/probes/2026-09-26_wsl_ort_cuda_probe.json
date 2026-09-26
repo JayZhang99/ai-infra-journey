@@ -1,0 +1,84 @@
+{
+  "created_at_utc": "2026-09-26T07:38:31.480452+00:00",
+  "model": {
+    "exists": false,
+    "path": "/home/jay/ai-infra-journey/artifacts/onnx/tiny_ffn/tiny_ffn.onnx",
+    "sha256": null,
+    "size_bytes": null
+  },
+  "nvcc": {
+    "returncode": 0,
+    "status": "passed",
+    "stderr": "",
+    "stdout": "nvcc: NVIDIA (R) Cuda compiler driver\nCopyright (c) 2005-2025 NVIDIA Corporation\nBuilt on Wed_Aug_20_01:58:59_PM_PDT_2025\nCuda compilation tools, release 13.0, V13.0.88\nBuild cuda_13.0.r13.0/compiler.36424714_0"
+  },
+  "nvidia_smi": {
+    "returncode": 0,
+    "status": "passed",
+    "stderr": "",
+    "stdout": "NVIDIA GeForce RTX 4070 Ti, 591.86, 12282 MiB"
+  },
+  "onnxruntime": {
+    "available_providers": [
+      "TensorrtExecutionProvider",
+      "CUDAExecutionProvider",
+      "CPUExecutionProvider"
+    ],
+    "cuda_ep_available": true,
+    "distributions": {
+      "onnxruntime-gpu": "1.29.0"
+    },
+    "import_status": "passed",
+    "version": "1.29.0"
+  },
+  "platform": {
+    "is_wsl": true,
+    "machine": "x86_64",
+    "release": "6.18.33.2-microsoft-standard-WSL2",
+    "system": "Linux"
+  },
+  "probe": "wsl_ort_cuda_environment",
+  "python": {
+    "executable": "/home/jay/ai-infra-journey/.venv-cu13/bin/python3",
+    "version": "3.11.0rc1"
+  },
+  "repository": {
+    "dirty": true,
+    "git_revision": "c77c2fc56d88d68b045bb4653640326f05b6ee38",
+    "revision_probe": {
+      "returncode": 0,
+      "status": "passed",
+      "stderr": "",
+      "stdout": "c77c2fc56d88d68b045bb4653640326f05b6ee38"
+    },
+    "root": "/home/jay/ai-infra-journey",
+    "status_probe": {
+      "returncode": 0,
+      "status": "passed",
+      "stderr": ""
+    }
+  },
+  "schema_version": 1,
+  "session_smoke": {
+    "reason": "model does not exist: /home/jay/ai-infra-journey/artifacts/onnx/tiny_ffn/tiny_ffn.onnx",
+    "status": "blocked"
+  },
+  "torch": {
+    "cuda_available": true,
+    "cuda_version": "13.0",
+    "device_count": 1,
+    "devices": [
+      {
+        "capability": [
+          8,
+          9
+        ],
+        "index": 0,
+        "name": "NVIDIA GeForce RTX 4070 Ti"
+      }
+    ],
+    "distribution": "2.13.0+cu130",
+    "import_status": "passed",
+    "version": "2.13.0+cu130"
+  }
+}
