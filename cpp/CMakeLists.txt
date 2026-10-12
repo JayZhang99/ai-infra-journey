@@ -8,6 +8,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 add_executable(ai_infra_hello src/main.cpp)
 
 include(CTest)
+add_subdirectory(inferflow)
 if(BUILD_TESTING)
     add_test(NAME hello_runs COMMAND ai_infra_hello)
 endif()

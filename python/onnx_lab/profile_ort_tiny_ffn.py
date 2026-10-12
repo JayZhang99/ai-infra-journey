@@ -20,6 +20,8 @@ LEVELS = {
     'all': ort.GraphOptimizationLevel.ORT_ENABLE_ALL,
 }
 
+
+
 def parse_shape(text: str) -> tuple[int, int, int]:
     parts = text.lower().split("x")
 
@@ -41,6 +43,39 @@ def parse_shape(text: str) -> tuple[int, int, int]:
         )
 
     return shape
+
+
+def make_providers(
+    device: str,
+    device_id: int = 0,
+):
+    available = list(ort.get_available_providers())
+
+    if device == "cpu":
+        if "CPUExecutionProvider" not in available:
+            raise RuntimeError("CPUExecutionProvider is unavailable")
+        return ["CPUExecutionProvider"]
+
+    if device == "cuda":
+        if "CUDAExecutionProvider" not in available:
+            raise RuntimeError(
+                "CUDAExecutionProvider is unavailable; "
+                f"available providers: {available}"
+            )
+
+        return [
+            (
+                "CUDAExecutionProvider",
+                {
+                    "device_id": device_id,
+                    "do_copy_in_default_stream": True,
+                },
+            ),
+            # 保留 CPU EP，允许 ORT 对 CUDA 不支持的节点 fallback。
+            "CPUExecutionProvider",
+        ]
+
+    raise ValueError(f"unsupported device: {device!r}")
 
 def make_options(*, level, threads, trace_prefix, optimized):
     if level not in LEVELS:
@@ -76,6 +111,119 @@ def sha256_file(path: Path) -> str:
 
     return digest.hexdigest()
 
+def summarize_node_assignments(
+    node_events: list[dict[str, Any]],
+) -> dict[str, Any]:
+    by_node: dict[str, dict[str, Any]] = {}
+
+    for event in node_events:
+        args = event.get("args") or {}
+
+        provider = str(
+            args.get("provider", "unknown")
+        )
+        op_name = str(
+            args.get("op_name", "unknown")
+        )
+        node_index = args.get("node_index")
+        event_name = str(
+            event.get("name", "unknown")
+        )
+        duration_us = float(
+            event.get("dur", 0.0)
+        )
+
+        # node_index 是跨多个 step 识别同一节点的首选字段。
+        if node_index is not None:
+            node_key = f"index:{node_index}"
+        else:
+            # 某些 ORT 版本可能没有 node_index。
+            node_key = f"name:{event_name}"
+
+        record = by_node.get(node_key)
+
+        if record is None:
+            by_node[node_key] = {
+                "node_key": node_key,
+                "node_index": (
+                    str(node_index)
+                    if node_index is not None
+                    else None
+                ),
+                "node_name": event_name,
+                "op_name": op_name,
+                "provider": provider,
+                "event_count": 1,
+                "total_profile_dur_us": duration_us,
+            }
+            continue
+
+        # 同一个图节点不应在不同 step 被分配给不同 Provider。
+        if record["provider"] != provider:
+            raise RuntimeError(
+                "inconsistent provider assignment for "
+                f"{node_key}: "
+                f"{record['provider']} versus {provider}"
+            )
+
+        if record["op_name"] != op_name:
+            raise RuntimeError(
+                "inconsistent op name for "
+                f"{node_key}: "
+                f"{record['op_name']} versus {op_name}"
+            )
+
+        record["event_count"] += 1
+        record["total_profile_dur_us"] += duration_us
+
+    assignments = sorted(
+        by_node.values(),
+        key=lambda item: (
+            int(item["node_index"])
+            if (
+                item["node_index"] is not None
+                and item["node_index"].isdigit()
+            )
+            else 1 << 30,
+            item["node_name"],
+        ),
+    )
+
+    unique_provider_counts = Counter(
+        item["provider"]
+        for item in assignments
+    )
+
+    cpu_fallback_nodes = [
+        item
+        for item in assignments
+        if item["provider"] == "CPUExecutionProvider"
+    ]
+
+    cuda_nodes = [
+        item
+        for item in assignments
+        if item["provider"] == "CUDAExecutionProvider"
+    ]
+
+    return {
+        "node_assignments": assignments,
+        "unique_provider_counts": dict(
+            sorted(unique_provider_counts.items())
+        ),
+        "cpu_fallback_nodes": cpu_fallback_nodes,
+        "assignment_summary": {
+            "unique_node_count": len(assignments),
+            "cuda_unique_node_count": len(cuda_nodes),
+            "cpu_unique_node_count": len(cpu_fallback_nodes),
+            "all_unique_nodes_on_cuda": (
+                bool(assignments)
+                and not cpu_fallback_nodes
+                and len(cuda_nodes) == len(assignments)
+            ),
+        },
+    }
+
 
 def summarize_events(
     events: list[dict[str, Any]],
@@ -86,6 +234,9 @@ def summarize_events(
         if event.get("cat") == "Node"
         and event.get("ph") == "X"
     ]
+
+    assignment_result = summarize_node_assignments(
+        node_events)
 
     session_events = [
         event
@@ -134,19 +285,22 @@ def summarize_events(
             }
             for op_name, duration_us in top_ops
         ],
+        **assignment_result,
     }
 
 def profile_model(
     *,
     model_path: Path,
-    shape: tuple[int, int, int],
+    shape: tuple[int, ...],
     steps: int,
     threads: int,
     level: str,
     trace_path: Path,
     summary_path: Path,
     optimized_model_path: Path | None,
-    seed: int,
+    seed: int = 0,
+    device: str = "cpu",
+    device_id: int = 0,
 ) -> dict[str, Any]:
     model_path = Path(model_path)
     trace_path = Path(trace_path)
@@ -193,11 +347,28 @@ def profile_model(
 
     session_start_ns = time.perf_counter_ns()
 
+    providers = make_providers(
+        device=device,
+        device_id=device_id,
+    )
+
     session = ort.InferenceSession(
         str(model_path),
         sess_options=options,
-        providers=["CPUExecutionProvider"],
+        providers=providers,
     )
+
+    selected_providers = list(session.get_providers())
+
+    if device == "cuda":
+        if not selected_providers:
+            raise RuntimeError("ORT Session returned no providers")
+
+        if selected_providers[0] != "CUDAExecutionProvider":
+            raise RuntimeError(
+                "CUDAExecutionProvider is not the highest-priority provider: "
+                f"{selected_providers}"
+            )
 
     session_creation_ms = (
         time.perf_counter_ns() - session_start_ns
@@ -283,7 +454,7 @@ def profile_model(
 
     result = {
         "schema_version": 1,
-        "experiment": "tiny_ffn_ort_cpu_profile",
+        "experiment": f"tiny_ffn_ort_{device}_profile",
         "created_at_utc": datetime.now(
             timezone.utc
         ).isoformat(),
@@ -299,6 +470,8 @@ def profile_model(
             "threads": threads,
             "optimization_level": level,
             "seed": seed,
+            "device": device,
+            "device_id": device_id if device == "cuda" else None,
         },
         "session": {
             "creation_ms": session_creation_ms,
@@ -332,7 +505,7 @@ def profile_model(
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Profile TinyFFN with ONNX Runtime CPU EP"
+        description="Profile TinyFFN with ONNX Runtime CPU/CUDA EP"
     )
 
     parser.add_argument(
@@ -379,6 +552,17 @@ def build_parser() -> argparse.ArgumentParser:
         type=int,
         default=0,
     )
+    parser.add_argument(
+        "--device",
+        choices=("cpu", "cuda"),
+        default="cpu",
+    )
+
+    parser.add_argument(
+        "--device-id",
+        type=int,
+        default=0,
+    )
 
     return parser
 
@@ -396,6 +580,8 @@ def main() -> None:
         summary_path=args.summary,
         optimized_model_path=args.optimized_model,
         seed=args.seed,
+        device=args.device,
+        device_id=args.device_id,
     )
 
     print(f"trace: {result['artifacts']['trace']['path']}")
