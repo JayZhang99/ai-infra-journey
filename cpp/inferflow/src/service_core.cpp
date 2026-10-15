@@ -2,6 +2,7 @@
 #include "inferflow/batch_plan.h"
 
 #include <cstddef>
+#include <chrono>
 #include <limits>
 #include <stdexcept>
 #include <utility>
@@ -92,13 +93,19 @@ Result ServiceCore::execute_one(RequestContext& ctx) {
     ctx.state = RequestState::kRunning;
 
     try {
+        ctx.timing.runtime_begin = std::chrono::steady_clock::now();
         TensorOutput output = runtime_->infer(ctx.input);
+        ctx.timing.runtime_end = std::chrono::steady_clock::now();
         return finish(
             ctx,
             RequestState::kSucceeded,
             {StatusCode::kOk, std::move(output), ""}
         );
     } catch (const std::exception&) {
+        if (ctx.timing.runtime_begin !=
+            RequestTiming::Clock::time_point{}) {
+            ctx.timing.runtime_end = std::chrono::steady_clock::now();
+        }
         return finish(
             ctx,
             RequestState::kRuntimeFailed,
@@ -158,7 +165,15 @@ std::vector<Result> ServiceCore::execute_batch(
         for (std::size_t pos : positions) {
             requests[pos]->state = RequestState::kRunning;
         }
+        const auto runtime_begin = std::chrono::steady_clock::now();
+        for (std::size_t pos : positions) {
+            requests[pos]->timing.runtime_begin = runtime_begin;
+        }
         TensorOutput merged = runtime_->infer(plan.merged);
+        const auto runtime_end = std::chrono::steady_clock::now();
+        for (std::size_t pos : positions) {
+            requests[pos]->timing.runtime_end = runtime_end;
+        }
         auto parts = split_batch_output(plan, merged);
         for (std::size_t j = 0; j < positions.size(); ++j) {
             results[positions[j]] = finish(*requests[positions[j]],
@@ -166,7 +181,14 @@ std::vector<Result> ServiceCore::execute_batch(
                 {StatusCode::kOk, std::move(parts[j]), ""});
         }
     } catch (const std::exception&) {
+        const auto runtime_end = std::chrono::steady_clock::now();
         for (std::size_t pos : positions) {
+            if (requests[pos]->timing.runtime_begin !=
+                    RequestTiming::Clock::time_point{} &&
+                requests[pos]->timing.runtime_end ==
+                    RequestTiming::Clock::time_point{}) {
+                requests[pos]->timing.runtime_end = runtime_end;
+            }
             results[pos] = finish(*requests[pos],
                 RequestState::kRuntimeFailed,
                 {StatusCode::kRuntimeError, std::nullopt,

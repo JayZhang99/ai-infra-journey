@@ -15,6 +15,29 @@ Result error_result(StatusCode code, const char* message) {
     return {code, std::nullopt, message};
 }
 
+double elapsed_ms(ServingEngine::Clock::time_point begin,
+                  ServingEngine::Clock::time_point end) {
+    if (begin == ServingEngine::Clock::time_point{} ||
+        end == ServingEngine::Clock::time_point{} || end < begin) {
+        return 0.0;
+    }
+    return std::chrono::duration<double, std::milli>(end - begin).count();
+}
+
+TimingMs summarize_timing(const RequestTiming& timing) {
+    TimingMs result;
+    result.queue_time = elapsed_ms(timing.enqueued_at, timing.dequeued_at);
+    result.pre_bucket_wait = elapsed_ms(timing.dequeued_at,
+                                        timing.bucketed_at);
+    result.batch_wait = elapsed_ms(timing.bucketed_at,
+                                   timing.dispatched_at);
+    result.runtime_time = elapsed_ms(timing.runtime_begin,
+                                     timing.runtime_end);
+    result.end_to_end = elapsed_ms(timing.submitted_at,
+                                   timing.completed_at);
+    return result;
+}
+
 ServingEngine::BatchPolicy checked_policy(ServingEngine::BatchPolicy policy) {
     if (policy.max_batch_rows == 0 ||
         policy.max_wait < ServingEngine::Clock::duration::zero()) {
@@ -60,10 +83,18 @@ std::future<Result> ServingEngine::submit(
     auto item = std::make_shared<Pending>();
     item->ctx = std::move(ctx);
     item->deadline = deadline;
+    item->ctx.timing.submitted_at = Clock::now();
     auto future = item->promise.get_future();
+    auto complete_immediately = [&](Result result) {
+        item->ctx.timing.completed_at = Clock::now();
+        result.timing.end_to_end = elapsed_ms(
+            item->ctx.timing.submitted_at, item->ctx.timing.completed_at);
+        item->ctx.result = result;
+        item->promise.set_value(std::move(result));
+    };
 
     if (Clock::now() >= deadline) {
-        item->promise.set_value(error_result(
+        complete_immediately(error_result(
             StatusCode::kDeadlineExceeded, "deadline already expired"));
         return future;
     }
@@ -75,18 +106,19 @@ std::future<Result> ServingEngine::submit(
 
         const auto& id = item->ctx.request_id;
         if (pending_.count(id) != 0) {
-            item->promise.set_value(error_result(
+            complete_immediately(error_result(
                 StatusCode::kInvalidArgument, "duplicate request_id"));
             return future;
         }
 
         pending_.emplace(id, item);
         item->ctx.state = RequestState::kQueued;
+        item->ctx.timing.enqueued_at = Clock::now();
         const PushResult pushed = queue_.try_push(item);
 
         if (pushed != PushResult::kOk) {
             pending_.erase(id);
-            item->promise.set_value(
+            complete_immediately(
                 pushed == PushResult::kFull
                     ? error_result(StatusCode::kResourceExhausted,
                                    "waiting queue is full")
@@ -117,6 +149,8 @@ void ServingEngine::worker_loop() {
     std::optional<std::int64_t> group_sequence;
 
     auto complete = [this](const Item& item, Result result) {
+        item->ctx.timing.completed_at = Clock::now();
+        result.timing = summarize_timing(item->ctx.timing);
         item->ctx.result = result;
         {
             std::lock_guard<std::mutex> lock(pending_mu_);
@@ -147,6 +181,10 @@ void ServingEngine::worker_loop() {
         }
         if (!ready.empty()) {
             // ServiceCore retains validation and Runtime ownership.
+            const auto dispatched_at = Clock::now();
+            for (const Item& item : ready_items) {
+                item->ctx.timing.dispatched_at = dispatched_at;
+            }
             auto results = core_.execute_batch(ready);
             for (std::size_t i = 0; i < ready_items.size(); ++i) {
                 const Item& item = ready_items[i];
@@ -176,6 +214,7 @@ void ServingEngine::worker_loop() {
                 deferred.reset();
             } else {
                 next = queue_.wait_pop();
+                if (next) (*next)->ctx.timing.dequeued_at = Clock::now();
             }
             if (!next) break;
             const auto sequence = batch_sequence((*next)->ctx,
@@ -186,9 +225,11 @@ void ServingEngine::worker_loop() {
                 continue;
             }
             group_sequence = sequence;
+            group.front()->ctx.timing.bucketed_at = Clock::now();
             bucket.add({group.front()->ctx.request_id,
                         static_cast<std::size_t>(
-                            group.front()->ctx.input.shape[0])}, Clock::now());
+                            group.front()->ctx.input.shape[0])},
+                       group.front()->ctx.timing.bucketed_at);
         }
 
         if (bucket.ready(Clock::now(), queue_.closed_and_empty())) {
@@ -205,6 +246,7 @@ void ServingEngine::worker_loop() {
             run_group();  // timer, deadline, or drain trigger
             continue;
         }
+        (*next)->ctx.timing.dequeued_at = Clock::now();
         const auto sequence = batch_sequence((*next)->ctx,
                                              policy_.max_batch_rows);
         const auto rows = sequence
@@ -214,7 +256,9 @@ void ServingEngine::worker_loop() {
             run_group();
             continue;
         }
-        bucket.add({(*next)->ctx.request_id, rows}, Clock::now());
+        (*next)->ctx.timing.bucketed_at = Clock::now();
+        bucket.add({(*next)->ctx.request_id, rows},
+                   (*next)->ctx.timing.bucketed_at);
         group.push_back(std::move(*next));
     }
 }

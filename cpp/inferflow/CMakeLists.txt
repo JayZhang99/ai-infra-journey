@@ -11,6 +11,15 @@ target_include_directories(inferflow_core
 target_compile_features(inferflow_core PUBLIC cxx_std_20)
 target_link_libraries(inferflow_core PUBLIC Threads::Threads)
 
+option(BUILD_INFERFLOW_BENCHMARKS
+       "Build synthetic Inferflow capacity-sweep benchmark" OFF)
+if(BUILD_INFERFLOW_BENCHMARKS)
+    add_executable(inferflow_capacity_sweep
+        benchmarks/capacity_sweep.cpp
+    )
+    target_link_libraries(inferflow_capacity_sweep PRIVATE inferflow_core)
+endif()
+
 if(BUILD_TESTING)
     add_executable(test_service_core
         tests/test_service_core.cpp
